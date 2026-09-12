@@ -8,6 +8,9 @@ National University of Singapore
 > other conformant Vulkan devices. The original PyTorch implementation remains
 > available as the correctness reference.
 
+The in-progress native backend and build instructions are in
+[`vulkan/`](vulkan/README.md).
+
 ## Key Insights
 In this paper, we focus on investigating spatial and channel attention under real-world VSR settings:
 - we investigate the sensitivity of two attention mechanisms to degraded queries and compare them for temporal feature aggregation;
@@ -51,4 +54,3 @@ python inference_realviformer.py --model_path pretrained_model/weights.pth --inp
 
 ## Acknowledgement
 The code is based on [BasicVSR](https://github.com/ckkelvinchan/BasicVSR-IconVSR) and [Restormer](https://github.com/swz30/Restormer). Thanks to their great work!
-
