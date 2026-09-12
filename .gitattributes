@@ -1,2 +1,3 @@
 *.pth binary
 *.rvf binary
+pretrained_model/ncnn/*.bin binary

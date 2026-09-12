@@ -13,9 +13,12 @@ The first milestone provides:
 - FP16 storage/arithmetic capability reporting;
 - a device-local transfer, compute, synchronization, and readback smoke test.
 - a deterministic native weight container and verified VRAM upload path.
+- a numerically validated ncnn frame-core graph;
+- native Vulkan scaled-dot-product attention and mask-descriptor execution.
 
-Model inference kernels are not implemented yet. The PyTorch path remains the
-reference used to validate each Vulkan operation as it is added.
+The frame core runs on Vulkan now. Optical flow, feature warping, tiled x4
+reconstruction, video I/O, and the hard dynamic-memory enforcement path remain
+under development. The PyTorch path is the correctness reference.
 
 ## Build
 
@@ -24,10 +27,49 @@ cmake -S vulkan -B build/vulkan -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build/vulkan
 ```
 
+The default build uses the exact ncnn revision pinned in the Git submodule.
+Clone this repository with `--recurse-submodules`, or run:
+
+```sh
+git submodule update --init --recursive
+```
+
 ## Run
 
 ```sh
 ./build/vulkan/rvf-vulkan --validation
+```
+
+Validate the bundled frame core against deterministic PyTorch fixtures:
+
+```sh
+python vulkan/tools/export_frame_core.py \
+    pretrained_model/weights.pth /tmp/realviformer-frame-core.pt \
+    --fixture-dir /tmp/realviformer-frame-core-fixture
+
+./build/vulkan/rvf-frame-core-test \
+    pretrained_model/ncnn/frame_core.param \
+    pretrained_model/ncnn/frame_core.bin \
+    /tmp/realviformer-frame-core-fixture
+
+./build/vulkan/rvf-frame-core-test \
+    pretrained_model/ncnn/frame_core.param \
+    pretrained_model/ncnn/frame_core.bin \
+    /tmp/realviformer-frame-core-fixture --vulkan
+```
+
+The ncnn graph is exported with PNNX while preserving
+`archs.realviformer_arch.AttentionMaskDescriptor` as a module operator. This
+removes generic matrix multiplication from the deployed graph and keeps the
+entire frame core on Vulkan.
+
+To reproduce the checked-in graph after building PNNX from the pinned ncnn
+submodule:
+
+```sh
+python vulkan/tools/export_ncnn_frame_core.py \
+    pretrained_model/weights.pth pretrained_model/ncnn \
+    --pnnx /path/to/pnnx
 ```
 
 Generate and validate the native model file:

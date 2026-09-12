@@ -12,6 +12,19 @@ from einops import rearrange
 import numbers
 
 
+def variance_last(x):
+    """Population variance expressed with deployment-friendly primitives."""
+    centered = x - x.mean(-1, keepdim=True)
+    return (centered * centered).mean(-1, keepdim=True)
+
+
+def normalize_last(x, eps=1e-12):
+    """L2-normalize the final dimension without a rank-specific operator."""
+    norm = torch.clamp(torch.sqrt((x * x).sum(-1, keepdim=True)), min=eps)
+    return x / norm
+
+
+
 @torch.no_grad() # @ is a decorator, which takes the decorated function as the argument of the function after @
 def default_init_weights(module_list, scale=1, bias_fill=0, **kwargs):
     """Initialize network weights.
@@ -356,7 +369,7 @@ class BiasFree_LayerNorm(nn.Module):
         self.normalized_shape = normalized_shape
 
     def forward(self, x):
-        sigma = x.var(-1, keepdim=True, unbiased=False)
+        sigma = variance_last(x)
         return x / torch.sqrt(sigma+1e-5) * self.weight
 
 class WithBias_LayerNorm(nn.Module):
@@ -374,7 +387,7 @@ class WithBias_LayerNorm(nn.Module):
 
     def forward(self, x):
         mu = x.mean(-1, keepdim=True)
-        sigma = x.var(-1, keepdim=True, unbiased=False)
+        sigma = variance_last(x)
         return (x - mu) / torch.sqrt(sigma+1e-5) * self.weight + self.bias
 
 
@@ -420,13 +433,11 @@ class Attention(nn.Module):
         k = rearrange(k, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
         v = rearrange(v, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
 
-        q = torch.nn.functional.normalize(q, dim=-1)
-        k = torch.nn.functional.normalize(k, dim=-1)
+        q = normalize_last(q)
+        k = normalize_last(k)
 
-        attn = (q @ k.transpose(-2, -1)) * self.temperature # c_q, c_kv (64, 32)
-        attn = attn.softmax(dim=-1)
-
-        out = (attn @ v)
+        scaled_q = q * self.temperature
+        out = F.scaled_dot_product_attention(scaled_q, k, v, scale=1.0)
         
         out = rearrange(out, 'b head c (h w) -> b (head c) h w', head=self.num_heads, h=h, w=w)
 
@@ -472,8 +483,8 @@ def cross_attention(x, ref):
     k = rearrange(k, 'b (head c) h w -> b head c (h w)', head=1)
     v = rearrange(v, 'b (head c) h w -> b head c (h w)', head=1)
 
-    q = torch.nn.functional.normalize(q, dim=-1)
-    k = torch.nn.functional.normalize(k, dim=-1)
+    q = normalize_last(q)
+    k = normalize_last(k)
 
     attn = (q @ k.transpose(-2, -1)) * 1 # self.temperature [c0, c1]
     max_, _ = torch.max(attn, dim=-1, keepdim=True)
@@ -516,18 +527,17 @@ class CrossChannelAttention(nn.Module):
         k = rearrange(k, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
         v = rearrange(v, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
         
-        q = torch.nn.functional.normalize(q, dim=-1)
-        k = torch.nn.functional.normalize(k, dim=-1)
+        q = normalize_last(q)
+        k = normalize_last(k)
 
-        attn = (q @ k.transpose(-2, -1)) * self.temperature
-        
-        attn = attn.softmax(dim=-1)
-        out = (attn @ v)
+        scaled_q = q * self.temperature
+        out = F.scaled_dot_product_attention(scaled_q, k, v, scale=1.0)
 
         out = rearrange(out, 'b head c (h w) -> b (head c) h w', head=self.num_heads, h=h, w=w)
 
         out = self.project_out(out) # (b, 64, h, w)
         if return_attn:
+            attn = (scaled_q @ k.transpose(-2, -1)).softmax(dim=-1)
             return out, attn
         else:
             return out

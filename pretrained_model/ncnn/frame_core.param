@@ -1,0 +1,1423 @@
+7767517
+1421 1762
+Input                    in0                      0 1 in0
+Split                    splitncnn_0              1 2 in0 1 2
+Input                    in1                      0 1 in1
+Split                    splitncnn_1              1 2 in1 4 5
+Convolution              conv_77                  1 1 2 6 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=1296
+Split                    splitncnn_2              1 3 6 7 8 9
+Permute                  permute_197              1 1 9 10 0=3
+Reshape                  reshape_267              1 1 10 11 0=48 1=-1
+Split                    splitncnn_3              1 3 11 12 13 14
+MemoryData               shallow_extraction.1.norm1.body 0 1 15 0=48
+Reduction                mean_482                 1 1 14 16 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_0                    2 1 12 16 17 0=1
+Split                    splitncnn_4              1 2 17 18 19
+BinaryOp                 mul_1                    2 1 18 19 20 0=2
+Reduction                mean_483                 1 1 20 21 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_2                    1 1 21 22 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_3                   1 1 22 23 0=5
+BinaryOp                 div_4                    2 1 13 23 24 0=3
+Reshape                  reshape_268              1 1 15 25 0=48 1=1
+BinaryOp                 mul_5                    2 1 24 25 26 0=2
+Reshape                  Tensor.reshape_761       2 1 26 8 27 6="48,1w,1h"
+Permute                  permute_198              1 1 27 28 0=4
+Split                    splitncnn_5              1 2 28 29 30
+MemoryData               shallow_extraction.1.attn 0 1 31 0=1 1=1 2=1
+Convolution              conv_78                  1 1 30 32 0=144 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6912
+ConvolutionDepthWise     convdw_616               1 1 32 33 0=144 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=1296 7=144
+Slice                    chunk_0                  1 3 33 34 35 36 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_269              1 1 34 37 0=-1 1=48 2=1
+Split                    splitncnn_6              1 3 37 38 39 40
+Reshape                  reshape_270              1 1 35 41 0=-1 1=48 2=1
+Split                    splitncnn_7              1 3 41 42 43 44
+Reshape                  reshape_271              1 1 36 45 0=-1 1=48 2=1
+BinaryOp                 mul_6                    2 1 38 39 46 0=2
+Reduction                sum_552                  1 1 46 47 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_7                   1 1 47 48 0=5
+Clip                     clamp_448                1 1 48 49 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_8                    2 1 42 43 50 0=2
+Reduction                sum_553                  1 1 50 51 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_9                   1 1 51 52 0=5
+Clip                     clamp_449                1 1 52 53 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_10                   2 1 44 53 54 0=3
+BinaryOp                 div_11                   2 1 40 49 55 0=3
+BinaryOp                 mul_12                   2 1 55 31 56 0=2
+SDPA                     sdpa_650                 3 1 56 54 45 57 5=0 6=1.0
+Reshape                  Tensor.reshape_769       2 1 57 29 58 6="1w,1h,48"
+Convolution              conv_79                  1 1 58 59 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=2304
+BinaryOp                 add_13                   2 1 7 59 60 0=0
+Split                    splitncnn_8              1 3 60 61 62 63
+Permute                  permute_199              1 1 63 64 0=3
+Reshape                  reshape_272              1 1 64 65 0=48 1=-1
+Split                    splitncnn_9              1 3 65 66 67 68
+MemoryData               shallow_extraction.1.norm2.body 0 1 69 0=48
+Reduction                mean_484                 1 1 68 70 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_14                   2 1 66 70 71 0=1
+Split                    splitncnn_10             1 2 71 72 73
+BinaryOp                 mul_15                   2 1 72 73 74 0=2
+Reduction                mean_485                 1 1 74 75 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_16                   1 1 75 76 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_17                  1 1 76 77 0=5
+BinaryOp                 div_18                   2 1 67 77 78 0=3
+Reshape                  reshape_273              1 1 69 79 0=48 1=1
+BinaryOp                 mul_19                   2 1 78 79 80 0=2
+Reshape                  Tensor.reshape_771       2 1 80 62 81 6="48,1w,1h"
+Permute                  permute_200              1 1 81 82 0=4
+Convolution              conv_80                  1 1 82 83 0=254 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=12192
+ConvolutionDepthWise     convdw_617               1 1 83 84 0=254 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=2286 7=254
+Slice                    chunk_1                  1 2 84 85 86 -23300=2,-233,-233 1=0
+GELU                     gelu_30                  1 1 85 87
+BinaryOp                 mul_20                   2 1 87 86 88 0=2
+Convolution              conv_81                  1 1 88 89 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6096
+BinaryOp                 add_21                   2 1 61 89 90 0=0
+Split                    splitncnn_11             1 2 90 91 92
+Permute                  permute_201              1 1 5 93 0=3
+Reshape                  reshape_274              1 1 93 94 0=48 1=-1
+Split                    splitncnn_12             1 3 94 95 96 97
+MemoryData               attn_merge.norm_kv.body  0 1 98 0=48
+Reduction                mean_486                 1 1 97 99 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_22                   2 1 95 99 100 0=1
+Split                    splitncnn_13             1 2 100 101 102
+BinaryOp                 mul_23                   2 1 101 102 103 0=2
+Reduction                mean_487                 1 1 103 104 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_24                   1 1 104 105 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_25                  1 1 105 106 0=5
+BinaryOp                 div_26                   2 1 96 106 107 0=3
+Reshape                  reshape_275              1 1 98 108 0=48 1=1
+BinaryOp                 mul_27                   2 1 107 108 109 0=2
+Reshape                  Tensor.reshape_773       2 1 109 4 110 6="48,1w,1h"
+Permute                  permute_202              1 1 110 111 0=4
+Permute                  permute_203              1 1 92 112 0=3
+Reshape                  reshape_276              1 1 112 113 0=48 1=-1
+Split                    splitncnn_14             1 3 113 114 115 116
+MemoryData               attn_merge.norm_q.body   0 1 117 0=48
+Reduction                mean_488                 1 1 116 118 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_28                   2 1 114 118 119 0=1
+Split                    splitncnn_15             1 2 119 120 121
+BinaryOp                 mul_29                   2 1 120 121 122 0=2
+Reduction                mean_489                 1 1 122 123 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_30                   1 1 123 124 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_31                  1 1 124 125 0=5
+BinaryOp                 div_32                   2 1 115 125 126 0=3
+Reshape                  reshape_277              1 1 117 127 0=48 1=1
+BinaryOp                 mul_33                   2 1 126 127 128 0=2
+Reshape                  Tensor.reshape_775       2 1 128 91 129 6="48,1w,1h"
+Permute                  permute_204              1 1 129 130 0=4
+Split                    splitncnn_16             1 3 130 131 132 133
+MemoryData               attn_merge.attn          0 1 134 0=1 1=1 2=2
+Convolution              conv_82                  1 1 111 135 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=4608
+ConvolutionDepthWise     convdw_618               1 1 135 136 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=864 7=96
+Slice                    chunk_2                  1 2 136 137 138 -23300=2,-233,-233 1=0
+Convolution              conv_83                  1 1 133 139 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Reshape                  reshape_278              1 1 139 140 0=-1 1=24 2=2
+Split                    splitncnn_17             1 3 140 141 142 143
+Reshape                  reshape_279              1 1 137 144 0=-1 1=24 2=2
+Split                    splitncnn_18             1 3 144 145 146 147
+Reshape                  reshape_280              1 1 138 148 0=-1 1=24 2=2
+BinaryOp                 mul_34                   2 1 141 142 149 0=2
+Reduction                sum_554                  1 1 149 150 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_35                  1 1 150 151 0=5
+Clip                     clamp_450                1 1 151 152 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_36                   2 1 145 146 153 0=2
+Reduction                sum_555                  1 1 153 154 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_37                  1 1 154 155 0=5
+Clip                     clamp_451                1 1 155 156 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_38                   2 1 147 156 157 0=3
+BinaryOp                 div_39                   2 1 143 152 158 0=3
+BinaryOp                 mul_40                   2 1 158 134 159 0=2
+SDPA                     sdpa_651                 3 1 159 157 148 160 5=0 6=1.0
+Reshape                  Tensor.reshape_783       2 1 160 132 161 6="1w,1h,48"
+Convolution              conv_84                  1 1 161 162 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=2304
+Split                    splitncnn_19             1 2 162 163 164
+Permute                  permute_205              1 1 164 165 0=3
+Reshape                  reshape_281              1 1 165 166 0=48 1=-1
+Split                    splitncnn_20             1 3 166 167 168 169
+MemoryData               attn_merge.norm_out.body 0 1 170 0=48
+Reduction                mean_490                 1 1 169 171 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_41                   2 1 167 171 172 0=1
+Split                    splitncnn_21             1 2 172 173 174
+BinaryOp                 mul_42                   2 1 173 174 175 0=2
+Reduction                mean_491                 1 1 175 176 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_43                   1 1 176 177 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_44                  1 1 177 178 0=5
+BinaryOp                 div_45                   2 1 168 178 179 0=3
+Reshape                  reshape_282              1 1 170 180 0=48 1=1
+BinaryOp                 mul_46                   2 1 179 180 181 0=2
+Reshape                  Tensor.reshape_785       2 1 181 163 182 6="48,1w,1h"
+Permute                  permute_206              1 1 182 183 0=4
+Concat                   cat_0                    2 1 131 183 184 0=0
+Convolution              conv_85                  1 1 184 185 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=4608
+ConvolutionDepthWise     convdw_619               1 1 185 186 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=432 7=48
+GELU                     gelu_187                 1 1 186 187
+Convolution              conv_86                  1 1 187 188 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=2304
+Split                    splitncnn_22             1 2 188 189 190
+Convolution              conv_87                  1 1 190 191 0=12 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=5184
+Split                    splitncnn_23             1 2 191 192 193
+Permute                  permute_207              1 1 193 194 0=3
+Reshape                  reshape_283              1 1 194 195 0=12 1=-1
+Split                    splitncnn_24             1 3 195 196 197 198
+MemoryData               encoder_level1.0.norm1.body 0 1 199 0=12
+Reduction                mean_492                 1 1 198 200 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_47                   2 1 196 200 201 0=1
+Split                    splitncnn_25             1 2 201 202 203
+BinaryOp                 mul_48                   2 1 202 203 204 0=2
+Reduction                mean_493                 1 1 204 205 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_49                   1 1 205 206 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_50                  1 1 206 207 0=5
+BinaryOp                 div_51                   2 1 197 207 208 0=3
+Reshape                  reshape_284              1 1 199 209 0=12 1=1
+BinaryOp                 mul_52                   2 1 208 209 210 0=2
+Reshape                  Tensor.reshape_787       2 1 210 192 211 6="12,1w,1h"
+Permute                  permute_208              1 1 211 212 0=4
+Split                    splitncnn_26             1 2 212 213 214
+MemoryData               encoder_level1.0.attn    0 1 215 0=1 1=1 2=1
+Convolution              conv_88                  1 1 214 216 0=36 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=432
+ConvolutionDepthWise     convdw_620               1 1 216 217 0=36 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=324 7=36
+Slice                    chunk_3                  1 3 217 218 219 220 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_285              1 1 218 221 0=-1 1=12 2=1
+Split                    splitncnn_27             1 3 221 222 223 224
+Reshape                  reshape_286              1 1 219 225 0=-1 1=12 2=1
+Split                    splitncnn_28             1 3 225 226 227 228
+Reshape                  reshape_287              1 1 220 229 0=-1 1=12 2=1
+BinaryOp                 mul_53                   2 1 222 223 230 0=2
+Reduction                sum_556                  1 1 230 231 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_54                  1 1 231 232 0=5
+Clip                     clamp_452                1 1 232 233 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_55                   2 1 226 227 234 0=2
+Reduction                sum_557                  1 1 234 235 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_56                  1 1 235 236 0=5
+Clip                     clamp_453                1 1 236 237 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_57                   2 1 228 237 238 0=3
+Split                    splitncnn_29             1 2 238 239 240
+BinaryOp                 div_58                   2 1 224 233 241 0=3
+BinaryOp                 mul_59                   2 1 241 215 242 0=2
+Split                    splitncnn_30             1 2 242 243 244
+archs.realviformer_arch.AttentionMaskDescriptor mask_descriptor          2 1 239 243 245
+Reshape                  reshape_288              1 1 245 246 0=2 1=12
+Gemm                     gemm_0                   1 1 246 247 10=-1 2=0 3=1 4=0 5=1 6=1 7=12 8=1 9=2
+Reshape                  reshape_289              1 1 247 248 0=1 1=12 2=1
+GELU                     gelu_31                  1 1 248 249
+Permute                  transpose_586            1 1 249 250 0=1
+Reshape                  reshape_290              1 1 250 251 0=12 1=1
+Gemm                     gemm_1                   1 1 251 252 10=-1 2=0 3=1 4=0 5=1 6=1 7=1 8=12 9=12
+Reshape                  reshape_291              1 1 252 253 0=12 1=1 2=1
+Permute                  transpose_587            1 1 253 254 0=1
+Sigmoid                  sigmoid_61               1 1 254 255
+SDPA                     sdpa_652                 3 1 244 240 229 256 5=0 6=1.0
+BinaryOp                 mul_60                   2 1 256 255 257 0=2
+Reshape                  Tensor.reshape_795       2 1 257 213 258 6="1w,1h,12"
+Convolution              conv_89                  1 1 258 259 0=12 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=144
+Convolution              conv_90                  1 1 259 260 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=5184
+BinaryOp                 add_61                   2 1 189 260 261 0=0
+Split                    splitncnn_31             1 3 261 262 263 264
+Permute                  permute_209              1 1 264 265 0=3
+Reshape                  reshape_292              1 1 265 266 0=48 1=-1
+Split                    splitncnn_32             1 3 266 267 268 269
+MemoryData               encoder_level1.0.norm2.body 0 1 270 0=48
+Reduction                mean_494                 1 1 269 271 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_62                   2 1 267 271 272 0=1
+Split                    splitncnn_33             1 2 272 273 274
+BinaryOp                 mul_63                   2 1 273 274 275 0=2
+Reduction                mean_495                 1 1 275 276 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_64                   1 1 276 277 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_65                  1 1 277 278 0=5
+BinaryOp                 div_66                   2 1 268 278 279 0=3
+Reshape                  reshape_293              1 1 270 280 0=48 1=1
+BinaryOp                 mul_67                   2 1 279 280 281 0=2
+Reshape                  Tensor.reshape_797       2 1 281 263 282 6="48,1w,1h"
+Permute                  permute_210              1 1 282 283 0=4
+Convolution              conv_91                  1 1 283 284 0=254 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=12192
+ConvolutionDepthWise     convdw_621               1 1 284 285 0=254 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=2286 7=254
+Slice                    chunk_4                  1 2 285 286 287 -23300=2,-233,-233 1=0
+GELU                     gelu_32                  1 1 286 288
+BinaryOp                 mul_68                   2 1 288 287 289 0=2
+Convolution              conv_92                  1 1 289 290 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6096
+BinaryOp                 add_69                   2 1 262 290 291 0=0
+Split                    splitncnn_34             1 2 291 292 293
+Convolution              conv_93                  1 1 293 294 0=12 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=5184
+Split                    splitncnn_35             1 2 294 295 296
+Permute                  permute_211              1 1 296 297 0=3
+Reshape                  reshape_294              1 1 297 298 0=12 1=-1
+Split                    splitncnn_36             1 3 298 299 300 301
+MemoryData               encoder_level1.1.norm1.body 0 1 302 0=12
+Reduction                mean_496                 1 1 301 303 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_70                   2 1 299 303 304 0=1
+Split                    splitncnn_37             1 2 304 305 306
+BinaryOp                 mul_71                   2 1 305 306 307 0=2
+Reduction                mean_497                 1 1 307 308 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_72                   1 1 308 309 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_73                  1 1 309 310 0=5
+BinaryOp                 div_74                   2 1 300 310 311 0=3
+Reshape                  reshape_295              1 1 302 312 0=12 1=1
+BinaryOp                 mul_75                   2 1 311 312 313 0=2
+Reshape                  Tensor.reshape_799       2 1 313 295 314 6="12,1w,1h"
+Permute                  permute_212              1 1 314 315 0=4
+Split                    splitncnn_38             1 2 315 316 317
+MemoryData               encoder_level1.1.attn    0 1 318 0=1 1=1 2=1
+Convolution              conv_94                  1 1 317 319 0=36 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=432
+ConvolutionDepthWise     convdw_622               1 1 319 320 0=36 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=324 7=36
+Slice                    chunk_5                  1 3 320 321 322 323 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_296              1 1 321 324 0=-1 1=12 2=1
+Split                    splitncnn_39             1 3 324 325 326 327
+Reshape                  reshape_297              1 1 322 328 0=-1 1=12 2=1
+Split                    splitncnn_40             1 3 328 329 330 331
+Reshape                  reshape_298              1 1 323 332 0=-1 1=12 2=1
+BinaryOp                 mul_76                   2 1 325 326 333 0=2
+Reduction                sum_558                  1 1 333 334 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_77                  1 1 334 335 0=5
+Clip                     clamp_454                1 1 335 336 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_78                   2 1 329 330 337 0=2
+Reduction                sum_559                  1 1 337 338 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_79                  1 1 338 339 0=5
+Clip                     clamp_455                1 1 339 340 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_80                   2 1 331 340 341 0=3
+Split                    splitncnn_41             1 2 341 342 343
+BinaryOp                 div_81                   2 1 327 336 344 0=3
+BinaryOp                 mul_82                   2 1 344 318 345 0=2
+Split                    splitncnn_42             1 2 345 346 347
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_0            2 1 342 346 348
+Reshape                  reshape_299              1 1 348 349 0=2 1=12
+Gemm                     gemm_2                   1 1 349 350 10=-1 2=0 3=1 4=0 5=1 6=1 7=12 8=1 9=2
+Reshape                  reshape_300              1 1 350 351 0=1 1=12 2=1
+GELU                     gelu_33                  1 1 351 352
+Permute                  transpose_588            1 1 352 353 0=1
+Reshape                  reshape_301              1 1 353 354 0=12 1=1
+Gemm                     gemm_3                   1 1 354 355 10=-1 2=0 3=1 4=0 5=1 6=1 7=1 8=12 9=12
+Reshape                  reshape_302              1 1 355 356 0=12 1=1 2=1
+Permute                  transpose_589            1 1 356 357 0=1
+Sigmoid                  sigmoid_62               1 1 357 358
+SDPA                     sdpa_653                 3 1 347 343 332 359 5=0 6=1.0
+BinaryOp                 mul_83                   2 1 359 358 360 0=2
+Reshape                  Tensor.reshape_807       2 1 360 316 361 6="1w,1h,12"
+Convolution              conv_95                  1 1 361 362 0=12 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=144
+Convolution              conv_96                  1 1 362 363 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=5184
+BinaryOp                 add_84                   2 1 292 363 364 0=0
+Split                    splitncnn_43             1 3 364 365 366 367
+Permute                  permute_213              1 1 367 368 0=3
+Reshape                  reshape_303              1 1 368 369 0=48 1=-1
+Split                    splitncnn_44             1 3 369 370 371 372
+MemoryData               encoder_level1.1.norm2.body 0 1 373 0=48
+Reduction                mean_498                 1 1 372 374 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_85                   2 1 370 374 375 0=1
+Split                    splitncnn_45             1 2 375 376 377
+BinaryOp                 mul_86                   2 1 376 377 378 0=2
+Reduction                mean_499                 1 1 378 379 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_87                   1 1 379 380 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_88                  1 1 380 381 0=5
+BinaryOp                 div_89                   2 1 371 381 382 0=3
+Reshape                  reshape_304              1 1 373 383 0=48 1=1
+BinaryOp                 mul_90                   2 1 382 383 384 0=2
+Reshape                  Tensor.reshape_809       2 1 384 366 385 6="48,1w,1h"
+Permute                  permute_214              1 1 385 386 0=4
+Convolution              conv_97                  1 1 386 387 0=254 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=12192
+ConvolutionDepthWise     convdw_623               1 1 387 388 0=254 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=2286 7=254
+Slice                    chunk_6                  1 2 388 389 390 -23300=2,-233,-233 1=0
+GELU                     gelu_34                  1 1 389 391
+BinaryOp                 mul_91                   2 1 391 390 392 0=2
+Convolution              conv_98                  1 1 392 393 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6096
+BinaryOp                 add_92                   2 1 365 393 394 0=0
+Split                    splitncnn_46             1 2 394 395 396
+Convolution              conv_99                  1 1 396 397 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=10368
+Reorg                    pixelunshuffle_195       1 1 397 398 0=2 1=0
+Split                    splitncnn_47             1 2 398 399 400
+Convolution              conv_100                 1 1 400 401 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_48             1 2 401 402 403
+Permute                  permute_215              1 1 403 404 0=3
+Reshape                  reshape_305              1 1 404 405 0=24 1=-1
+Split                    splitncnn_49             1 3 405 406 407 408
+MemoryData               encoder_level2.0.norm1.body 0 1 409 0=24
+Reduction                mean_500                 1 1 408 410 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_93                   2 1 406 410 411 0=1
+Split                    splitncnn_50             1 2 411 412 413
+BinaryOp                 mul_94                   2 1 412 413 414 0=2
+Reduction                mean_501                 1 1 414 415 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_95                   1 1 415 416 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_96                  1 1 416 417 0=5
+BinaryOp                 div_97                   2 1 407 417 418 0=3
+Reshape                  reshape_306              1 1 409 419 0=24 1=1
+BinaryOp                 mul_98                   2 1 418 419 420 0=2
+Reshape                  Tensor.reshape_811       2 1 420 402 421 6="24,1w,1h"
+Permute                  permute_216              1 1 421 422 0=4
+Split                    splitncnn_51             1 2 422 423 424
+MemoryData               encoder_level2.0.attn    0 1 425 0=1 1=1 2=2
+Convolution              conv_101                 1 1 424 426 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_624               1 1 426 427 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_7                  1 3 427 428 429 430 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_307              1 1 428 431 0=-1 1=12 2=2
+Split                    splitncnn_52             1 3 431 432 433 434
+Reshape                  reshape_308              1 1 429 435 0=-1 1=12 2=2
+Split                    splitncnn_53             1 3 435 436 437 438
+Reshape                  reshape_309              1 1 430 439 0=-1 1=12 2=2
+BinaryOp                 mul_99                   2 1 432 433 440 0=2
+Reduction                sum_560                  1 1 440 441 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_100                 1 1 441 442 0=5
+Clip                     clamp_456                1 1 442 443 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_101                  2 1 436 437 444 0=2
+Reduction                sum_561                  1 1 444 445 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_102                 1 1 445 446 0=5
+Clip                     clamp_457                1 1 446 447 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_103                  2 1 438 447 448 0=3
+Split                    splitncnn_54             1 2 448 449 450
+BinaryOp                 div_104                  2 1 434 443 451 0=3
+BinaryOp                 mul_105                  2 1 451 425 452 0=2
+Split                    splitncnn_55             1 2 452 453 454
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_1            2 1 449 453 455
+Reshape                  reshape_310              1 1 455 456 0=2 1=24
+Gemm                     gemm_4                   1 1 456 457 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_311              1 1 457 458 0=1 1=12 2=2
+GELU                     gelu_35                  1 1 458 459
+Permute                  transpose_590            1 1 459 460 0=1
+Reshape                  reshape_312              1 1 460 461 0=12 1=2
+Gemm                     gemm_5                   1 1 461 462 10=-1 2=0 3=1 4=0 5=1 6=1 7=2 8=12 9=12
+Reshape                  reshape_313              1 1 462 463 0=12 1=1 2=2
+Permute                  transpose_591            1 1 463 464 0=1
+Sigmoid                  sigmoid_63               1 1 464 465
+SDPA                     sdpa_654                 3 1 454 450 439 466 5=0 6=1.0
+BinaryOp                 mul_106                  2 1 466 465 467 0=2
+Reshape                  Tensor.reshape_819       2 1 467 423 468 6="1w,1h,24"
+Convolution              conv_102                 1 1 468 469 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_103                 1 1 469 470 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_107                  2 1 399 470 471 0=0
+Split                    splitncnn_56             1 3 471 472 473 474
+Permute                  permute_217              1 1 474 475 0=3
+Reshape                  reshape_314              1 1 475 476 0=96 1=-1
+Split                    splitncnn_57             1 3 476 477 478 479
+MemoryData               encoder_level2.0.norm2.body 0 1 480 0=96
+Reduction                mean_502                 1 1 479 481 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_108                  2 1 477 481 482 0=1
+Split                    splitncnn_58             1 2 482 483 484
+BinaryOp                 mul_109                  2 1 483 484 485 0=2
+Reduction                mean_503                 1 1 485 486 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_110                  1 1 486 487 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_111                 1 1 487 488 0=5
+BinaryOp                 div_112                  2 1 478 488 489 0=3
+Reshape                  reshape_315              1 1 480 490 0=96 1=1
+BinaryOp                 mul_113                  2 1 489 490 491 0=2
+Reshape                  Tensor.reshape_821       2 1 491 473 492 6="96,1w,1h"
+Permute                  permute_218              1 1 492 493 0=4
+Convolution              conv_104                 1 1 493 494 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_625               1 1 494 495 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_8                  1 2 495 496 497 -23300=2,-233,-233 1=0
+GELU                     gelu_36                  1 1 496 498
+BinaryOp                 mul_114                  2 1 498 497 499 0=2
+Convolution              conv_105                 1 1 499 500 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_115                  2 1 472 500 501 0=0
+Split                    splitncnn_59             1 2 501 502 503
+Convolution              conv_106                 1 1 503 504 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_60             1 2 504 505 506
+Permute                  permute_219              1 1 506 507 0=3
+Reshape                  reshape_316              1 1 507 508 0=24 1=-1
+Split                    splitncnn_61             1 3 508 509 510 511
+MemoryData               encoder_level2.1.norm1.body 0 1 512 0=24
+Reduction                mean_504                 1 1 511 513 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_116                  2 1 509 513 514 0=1
+Split                    splitncnn_62             1 2 514 515 516
+BinaryOp                 mul_117                  2 1 515 516 517 0=2
+Reduction                mean_505                 1 1 517 518 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_118                  1 1 518 519 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_119                 1 1 519 520 0=5
+BinaryOp                 div_120                  2 1 510 520 521 0=3
+Reshape                  reshape_317              1 1 512 522 0=24 1=1
+BinaryOp                 mul_121                  2 1 521 522 523 0=2
+Reshape                  Tensor.reshape_823       2 1 523 505 524 6="24,1w,1h"
+Permute                  permute_220              1 1 524 525 0=4
+Split                    splitncnn_63             1 2 525 526 527
+MemoryData               encoder_level2.1.attn    0 1 528 0=1 1=1 2=2
+Convolution              conv_107                 1 1 527 529 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_626               1 1 529 530 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_9                  1 3 530 531 532 533 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_318              1 1 531 534 0=-1 1=12 2=2
+Split                    splitncnn_64             1 3 534 535 536 537
+Reshape                  reshape_319              1 1 532 538 0=-1 1=12 2=2
+Split                    splitncnn_65             1 3 538 539 540 541
+Reshape                  reshape_320              1 1 533 542 0=-1 1=12 2=2
+BinaryOp                 mul_122                  2 1 535 536 543 0=2
+Reduction                sum_562                  1 1 543 544 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_123                 1 1 544 545 0=5
+Clip                     clamp_458                1 1 545 546 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_124                  2 1 539 540 547 0=2
+Reduction                sum_563                  1 1 547 548 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_125                 1 1 548 549 0=5
+Clip                     clamp_459                1 1 549 550 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_126                  2 1 541 550 551 0=3
+Split                    splitncnn_66             1 2 551 552 553
+BinaryOp                 div_127                  2 1 537 546 554 0=3
+BinaryOp                 mul_128                  2 1 554 528 555 0=2
+Split                    splitncnn_67             1 2 555 556 557
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_2            2 1 552 556 558
+Reshape                  reshape_321              1 1 558 559 0=2 1=24
+Gemm                     gemm_6                   1 1 559 560 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_322              1 1 560 561 0=1 1=12 2=2
+GELU                     gelu_37                  1 1 561 562
+Permute                  transpose_592            1 1 562 563 0=1
+Reshape                  reshape_323              1 1 563 564 0=12 1=2
+Gemm                     gemm_7                   1 1 564 565 10=-1 2=0 3=1 4=0 5=1 6=1 7=2 8=12 9=12
+Reshape                  reshape_324              1 1 565 566 0=12 1=1 2=2
+Permute                  transpose_593            1 1 566 567 0=1
+Sigmoid                  sigmoid_64               1 1 567 568
+SDPA                     sdpa_655                 3 1 557 553 542 569 5=0 6=1.0
+BinaryOp                 mul_129                  2 1 569 568 570 0=2
+Reshape                  Tensor.reshape_831       2 1 570 526 571 6="1w,1h,24"
+Convolution              conv_108                 1 1 571 572 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_109                 1 1 572 573 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_130                  2 1 502 573 574 0=0
+Split                    splitncnn_68             1 3 574 575 576 577
+Permute                  permute_221              1 1 577 578 0=3
+Reshape                  reshape_325              1 1 578 579 0=96 1=-1
+Split                    splitncnn_69             1 3 579 580 581 582
+MemoryData               encoder_level2.1.norm2.body 0 1 583 0=96
+Reduction                mean_506                 1 1 582 584 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_131                  2 1 580 584 585 0=1
+Split                    splitncnn_70             1 2 585 586 587
+BinaryOp                 mul_132                  2 1 586 587 588 0=2
+Reduction                mean_507                 1 1 588 589 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_133                  1 1 589 590 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_134                 1 1 590 591 0=5
+BinaryOp                 div_135                  2 1 581 591 592 0=3
+Reshape                  reshape_326              1 1 583 593 0=96 1=1
+BinaryOp                 mul_136                  2 1 592 593 594 0=2
+Reshape                  Tensor.reshape_833       2 1 594 576 595 6="96,1w,1h"
+Permute                  permute_222              1 1 595 596 0=4
+Convolution              conv_110                 1 1 596 597 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_627               1 1 597 598 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_10                 1 2 598 599 600 -23300=2,-233,-233 1=0
+GELU                     gelu_38                  1 1 599 601
+BinaryOp                 mul_137                  2 1 601 600 602 0=2
+Convolution              conv_111                 1 1 602 603 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_138                  2 1 575 603 604 0=0
+Split                    splitncnn_71             1 2 604 605 606
+Convolution              conv_112                 1 1 606 607 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_72             1 2 607 608 609
+Permute                  permute_223              1 1 609 610 0=3
+Reshape                  reshape_327              1 1 610 611 0=24 1=-1
+Split                    splitncnn_73             1 3 611 612 613 614
+MemoryData               encoder_level2.2.norm1.body 0 1 615 0=24
+Reduction                mean_508                 1 1 614 616 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_139                  2 1 612 616 617 0=1
+Split                    splitncnn_74             1 2 617 618 619
+BinaryOp                 mul_140                  2 1 618 619 620 0=2
+Reduction                mean_509                 1 1 620 621 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_141                  1 1 621 622 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_142                 1 1 622 623 0=5
+BinaryOp                 div_143                  2 1 613 623 624 0=3
+Reshape                  reshape_328              1 1 615 625 0=24 1=1
+BinaryOp                 mul_144                  2 1 624 625 626 0=2
+Reshape                  Tensor.reshape_835       2 1 626 608 627 6="24,1w,1h"
+Permute                  permute_224              1 1 627 628 0=4
+Split                    splitncnn_75             1 2 628 629 630
+MemoryData               encoder_level2.2.attn    0 1 631 0=1 1=1 2=2
+Convolution              conv_113                 1 1 630 632 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_628               1 1 632 633 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_11                 1 3 633 634 635 636 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_329              1 1 634 637 0=-1 1=12 2=2
+Split                    splitncnn_76             1 3 637 638 639 640
+Reshape                  reshape_330              1 1 635 641 0=-1 1=12 2=2
+Split                    splitncnn_77             1 3 641 642 643 644
+Reshape                  reshape_331              1 1 636 645 0=-1 1=12 2=2
+BinaryOp                 mul_145                  2 1 638 639 646 0=2
+Reduction                sum_564                  1 1 646 647 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_146                 1 1 647 648 0=5
+Clip                     clamp_460                1 1 648 649 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_147                  2 1 642 643 650 0=2
+Reduction                sum_565                  1 1 650 651 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_148                 1 1 651 652 0=5
+Clip                     clamp_461                1 1 652 653 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_149                  2 1 644 653 654 0=3
+Split                    splitncnn_78             1 2 654 655 656
+BinaryOp                 div_150                  2 1 640 649 657 0=3
+BinaryOp                 mul_151                  2 1 657 631 658 0=2
+Split                    splitncnn_79             1 2 658 659 660
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_3            2 1 655 659 661
+Reshape                  reshape_332              1 1 661 662 0=2 1=24
+Gemm                     gemm_8                   1 1 662 663 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_333              1 1 663 664 0=1 1=12 2=2
+GELU                     gelu_39                  1 1 664 665
+Permute                  transpose_594            1 1 665 666 0=1
+Reshape                  reshape_334              1 1 666 667 0=12 1=2
+Gemm                     gemm_9                   1 1 667 668 10=-1 2=0 3=1 4=0 5=1 6=1 7=2 8=12 9=12
+Reshape                  reshape_335              1 1 668 669 0=12 1=1 2=2
+Permute                  transpose_595            1 1 669 670 0=1
+Sigmoid                  sigmoid_65               1 1 670 671
+SDPA                     sdpa_656                 3 1 660 656 645 672 5=0 6=1.0
+BinaryOp                 mul_152                  2 1 672 671 673 0=2
+Reshape                  Tensor.reshape_843       2 1 673 629 674 6="1w,1h,24"
+Convolution              conv_114                 1 1 674 675 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_115                 1 1 675 676 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_153                  2 1 605 676 677 0=0
+Split                    splitncnn_80             1 3 677 678 679 680
+Permute                  permute_225              1 1 680 681 0=3
+Reshape                  reshape_336              1 1 681 682 0=96 1=-1
+Split                    splitncnn_81             1 3 682 683 684 685
+MemoryData               encoder_level2.2.norm2.body 0 1 686 0=96
+Reduction                mean_510                 1 1 685 687 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_154                  2 1 683 687 688 0=1
+Split                    splitncnn_82             1 2 688 689 690
+BinaryOp                 mul_155                  2 1 689 690 691 0=2
+Reduction                mean_511                 1 1 691 692 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_156                  1 1 692 693 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_157                 1 1 693 694 0=5
+BinaryOp                 div_158                  2 1 684 694 695 0=3
+Reshape                  reshape_337              1 1 686 696 0=96 1=1
+BinaryOp                 mul_159                  2 1 695 696 697 0=2
+Reshape                  Tensor.reshape_845       2 1 697 679 698 6="96,1w,1h"
+Permute                  permute_226              1 1 698 699 0=4
+Convolution              conv_116                 1 1 699 700 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_629               1 1 700 701 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_12                 1 2 701 702 703 -23300=2,-233,-233 1=0
+GELU                     gelu_40                  1 1 702 704
+BinaryOp                 mul_160                  2 1 704 703 705 0=2
+Convolution              conv_117                 1 1 705 706 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_161                  2 1 678 706 707 0=0
+Split                    splitncnn_83             1 2 707 708 709
+Convolution              conv_118                 1 1 709 710 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=41472
+Reorg                    pixelunshuffle_196       1 1 710 711 0=2 1=0
+Split                    splitncnn_84             1 2 711 712 713
+Convolution              conv_119                 1 1 713 714 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+Split                    splitncnn_85             1 2 714 715 716
+Permute                  permute_227              1 1 716 717 0=3
+Reshape                  reshape_338              1 1 717 718 0=48 1=-1
+Split                    splitncnn_86             1 3 718 719 720 721
+MemoryData               latent.0.norm1.body      0 1 722 0=48
+Reduction                mean_512                 1 1 721 723 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_162                  2 1 719 723 724 0=1
+Split                    splitncnn_87             1 2 724 725 726
+BinaryOp                 mul_163                  2 1 725 726 727 0=2
+Reduction                mean_513                 1 1 727 728 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_164                  1 1 728 729 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_165                 1 1 729 730 0=5
+BinaryOp                 div_166                  2 1 720 730 731 0=3
+Reshape                  reshape_339              1 1 722 732 0=48 1=1
+BinaryOp                 mul_167                  2 1 731 732 733 0=2
+Reshape                  Tensor.reshape_847       2 1 733 715 734 6="48,1w,1h"
+Permute                  permute_228              1 1 734 735 0=4
+Split                    splitncnn_88             1 2 735 736 737
+MemoryData               latent.0.attn            0 1 738 0=1 1=1 2=4
+Convolution              conv_120                 1 1 737 739 0=144 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6912
+ConvolutionDepthWise     convdw_630               1 1 739 740 0=144 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=1296 7=144
+Slice                    chunk_13                 1 3 740 741 742 743 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_340              1 1 741 744 0=-1 1=12 2=4
+Split                    splitncnn_89             1 3 744 745 746 747
+Reshape                  reshape_341              1 1 742 748 0=-1 1=12 2=4
+Split                    splitncnn_90             1 3 748 749 750 751
+Reshape                  reshape_342              1 1 743 752 0=-1 1=12 2=4
+BinaryOp                 mul_168                  2 1 745 746 753 0=2
+Reduction                sum_566                  1 1 753 754 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_169                 1 1 754 755 0=5
+Clip                     clamp_462                1 1 755 756 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_170                  2 1 749 750 757 0=2
+Reduction                sum_567                  1 1 757 758 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_171                 1 1 758 759 0=5
+Clip                     clamp_463                1 1 759 760 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_172                  2 1 751 760 761 0=3
+Split                    splitncnn_91             1 2 761 762 763
+BinaryOp                 div_173                  2 1 747 756 764 0=3
+BinaryOp                 mul_174                  2 1 764 738 765 0=2
+Split                    splitncnn_92             1 2 765 766 767
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_4            2 1 762 766 768
+Reshape                  reshape_343              1 1 768 769 0=2 1=48
+Gemm                     gemm_10                  1 1 769 770 10=-1 2=0 3=1 4=0 5=1 6=1 7=48 8=1 9=2
+Reshape                  reshape_344              1 1 770 771 0=1 1=12 2=4
+GELU                     gelu_41                  1 1 771 772
+Permute                  transpose_596            1 1 772 773 0=1
+Reshape                  reshape_345              1 1 773 774 0=12 1=4
+Gemm                     gemm_11                  1 1 774 775 10=-1 2=0 3=1 4=0 5=1 6=1 7=4 8=12 9=12
+Reshape                  reshape_346              1 1 775 776 0=12 1=1 2=4
+Permute                  transpose_597            1 1 776 777 0=1
+Sigmoid                  sigmoid_66               1 1 777 778
+SDPA                     sdpa_657                 3 1 767 763 752 779 5=0 6=1.0
+BinaryOp                 mul_175                  2 1 779 778 780 0=2
+Reshape                  Tensor.reshape_855       2 1 780 736 781 6="1w,1h,48"
+Convolution              conv_121                 1 1 781 782 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=2304
+Convolution              conv_122                 1 1 782 783 0=192 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+BinaryOp                 add_176                  2 1 712 783 784 0=0
+Split                    splitncnn_93             1 3 784 785 786 787
+Permute                  permute_229              1 1 787 788 0=3
+Reshape                  reshape_347              1 1 788 789 0=192 1=-1
+Split                    splitncnn_94             1 3 789 790 791 792
+MemoryData               latent.0.norm2.body      0 1 793 0=192
+Reduction                mean_514                 1 1 792 794 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_177                  2 1 790 794 795 0=1
+Split                    splitncnn_95             1 2 795 796 797
+BinaryOp                 mul_178                  2 1 796 797 798 0=2
+Reduction                mean_515                 1 1 798 799 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_179                  1 1 799 800 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_180                 1 1 800 801 0=5
+BinaryOp                 div_181                  2 1 791 801 802 0=3
+Reshape                  reshape_348              1 1 793 803 0=192 1=1
+BinaryOp                 mul_182                  2 1 802 803 804 0=2
+Reshape                  Tensor.reshape_857       2 1 804 786 805 6="192,1w,1h"
+Permute                  permute_230              1 1 805 806 0=4
+Convolution              conv_123                 1 1 806 807 0=1020 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=195840
+ConvolutionDepthWise     convdw_631               1 1 807 808 0=1020 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=9180 7=1020
+Slice                    chunk_14                 1 2 808 809 810 -23300=2,-233,-233 1=0
+GELU                     gelu_42                  1 1 809 811
+BinaryOp                 mul_183                  2 1 811 810 812 0=2
+Convolution              conv_124                 1 1 812 813 0=192 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=97920
+BinaryOp                 add_184                  2 1 785 813 814 0=0
+Split                    splitncnn_96             1 2 814 815 816
+Convolution              conv_125                 1 1 816 817 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+Split                    splitncnn_97             1 2 817 818 819
+Permute                  permute_231              1 1 819 820 0=3
+Reshape                  reshape_349              1 1 820 821 0=48 1=-1
+Split                    splitncnn_98             1 3 821 822 823 824
+MemoryData               latent.1.norm1.body      0 1 825 0=48
+Reduction                mean_516                 1 1 824 826 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_185                  2 1 822 826 827 0=1
+Split                    splitncnn_99             1 2 827 828 829
+BinaryOp                 mul_186                  2 1 828 829 830 0=2
+Reduction                mean_517                 1 1 830 831 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_187                  1 1 831 832 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_188                 1 1 832 833 0=5
+BinaryOp                 div_189                  2 1 823 833 834 0=3
+Reshape                  reshape_350              1 1 825 835 0=48 1=1
+BinaryOp                 mul_190                  2 1 834 835 836 0=2
+Reshape                  Tensor.reshape_859       2 1 836 818 837 6="48,1w,1h"
+Permute                  permute_232              1 1 837 838 0=4
+Split                    splitncnn_100            1 2 838 839 840
+MemoryData               latent.1.attn            0 1 841 0=1 1=1 2=4
+Convolution              conv_126                 1 1 840 842 0=144 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6912
+ConvolutionDepthWise     convdw_632               1 1 842 843 0=144 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=1296 7=144
+Slice                    chunk_15                 1 3 843 844 845 846 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_351              1 1 844 847 0=-1 1=12 2=4
+Split                    splitncnn_101            1 3 847 848 849 850
+Reshape                  reshape_352              1 1 845 851 0=-1 1=12 2=4
+Split                    splitncnn_102            1 3 851 852 853 854
+Reshape                  reshape_353              1 1 846 855 0=-1 1=12 2=4
+BinaryOp                 mul_191                  2 1 848 849 856 0=2
+Reduction                sum_568                  1 1 856 857 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_192                 1 1 857 858 0=5
+Clip                     clamp_464                1 1 858 859 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_193                  2 1 852 853 860 0=2
+Reduction                sum_569                  1 1 860 861 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_194                 1 1 861 862 0=5
+Clip                     clamp_465                1 1 862 863 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_195                  2 1 854 863 864 0=3
+Split                    splitncnn_103            1 2 864 865 866
+BinaryOp                 div_196                  2 1 850 859 867 0=3
+BinaryOp                 mul_197                  2 1 867 841 868 0=2
+Split                    splitncnn_104            1 2 868 869 870
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_5            2 1 865 869 871
+Reshape                  reshape_354              1 1 871 872 0=2 1=48
+Gemm                     gemm_12                  1 1 872 873 10=-1 2=0 3=1 4=0 5=1 6=1 7=48 8=1 9=2
+Reshape                  reshape_355              1 1 873 874 0=1 1=12 2=4
+GELU                     gelu_43                  1 1 874 875
+Permute                  transpose_598            1 1 875 876 0=1
+Reshape                  reshape_356              1 1 876 877 0=12 1=4
+Gemm                     gemm_13                  1 1 877 878 10=-1 2=0 3=1 4=0 5=1 6=1 7=4 8=12 9=12
+Reshape                  reshape_357              1 1 878 879 0=12 1=1 2=4
+Permute                  transpose_599            1 1 879 880 0=1
+Sigmoid                  sigmoid_67               1 1 880 881
+SDPA                     sdpa_658                 3 1 870 866 855 882 5=0 6=1.0
+BinaryOp                 mul_198                  2 1 882 881 883 0=2
+Reshape                  Tensor.reshape_867       2 1 883 839 884 6="1w,1h,48"
+Convolution              conv_127                 1 1 884 885 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=2304
+Convolution              conv_128                 1 1 885 886 0=192 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+BinaryOp                 add_199                  2 1 815 886 887 0=0
+Split                    splitncnn_105            1 3 887 888 889 890
+Permute                  permute_233              1 1 890 891 0=3
+Reshape                  reshape_358              1 1 891 892 0=192 1=-1
+Split                    splitncnn_106            1 3 892 893 894 895
+MemoryData               latent.1.norm2.body      0 1 896 0=192
+Reduction                mean_518                 1 1 895 897 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_200                  2 1 893 897 898 0=1
+Split                    splitncnn_107            1 2 898 899 900
+BinaryOp                 mul_201                  2 1 899 900 901 0=2
+Reduction                mean_519                 1 1 901 902 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_202                  1 1 902 903 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_203                 1 1 903 904 0=5
+BinaryOp                 div_204                  2 1 894 904 905 0=3
+Reshape                  reshape_359              1 1 896 906 0=192 1=1
+BinaryOp                 mul_205                  2 1 905 906 907 0=2
+Reshape                  Tensor.reshape_869       2 1 907 889 908 6="192,1w,1h"
+Permute                  permute_234              1 1 908 909 0=4
+Convolution              conv_129                 1 1 909 910 0=1020 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=195840
+ConvolutionDepthWise     convdw_633               1 1 910 911 0=1020 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=9180 7=1020
+Slice                    chunk_16                 1 2 911 912 913 -23300=2,-233,-233 1=0
+GELU                     gelu_44                  1 1 912 914
+BinaryOp                 mul_206                  2 1 914 913 915 0=2
+Convolution              conv_130                 1 1 915 916 0=192 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=97920
+BinaryOp                 add_207                  2 1 888 916 917 0=0
+Split                    splitncnn_108            1 2 917 918 919
+Convolution              conv_131                 1 1 919 920 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+Split                    splitncnn_109            1 2 920 921 922
+Permute                  permute_235              1 1 922 923 0=3
+Reshape                  reshape_360              1 1 923 924 0=48 1=-1
+Split                    splitncnn_110            1 3 924 925 926 927
+MemoryData               latent.2.norm1.body      0 1 928 0=48
+Reduction                mean_520                 1 1 927 929 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_208                  2 1 925 929 930 0=1
+Split                    splitncnn_111            1 2 930 931 932
+BinaryOp                 mul_209                  2 1 931 932 933 0=2
+Reduction                mean_521                 1 1 933 934 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_210                  1 1 934 935 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_211                 1 1 935 936 0=5
+BinaryOp                 div_212                  2 1 926 936 937 0=3
+Reshape                  reshape_361              1 1 928 938 0=48 1=1
+BinaryOp                 mul_213                  2 1 937 938 939 0=2
+Reshape                  Tensor.reshape_871       2 1 939 921 940 6="48,1w,1h"
+Permute                  permute_236              1 1 940 941 0=4
+Split                    splitncnn_112            1 2 941 942 943
+MemoryData               latent.2.attn            0 1 944 0=1 1=1 2=4
+Convolution              conv_132                 1 1 943 945 0=144 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6912
+ConvolutionDepthWise     convdw_634               1 1 945 946 0=144 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=1296 7=144
+Slice                    chunk_17                 1 3 946 947 948 949 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_362              1 1 947 950 0=-1 1=12 2=4
+Split                    splitncnn_113            1 3 950 951 952 953
+Reshape                  reshape_363              1 1 948 954 0=-1 1=12 2=4
+Split                    splitncnn_114            1 3 954 955 956 957
+Reshape                  reshape_364              1 1 949 958 0=-1 1=12 2=4
+BinaryOp                 mul_214                  2 1 951 952 959 0=2
+Reduction                sum_570                  1 1 959 960 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_215                 1 1 960 961 0=5
+Clip                     clamp_466                1 1 961 962 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_216                  2 1 955 956 963 0=2
+Reduction                sum_571                  1 1 963 964 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_217                 1 1 964 965 0=5
+Clip                     clamp_467                1 1 965 966 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_218                  2 1 957 966 967 0=3
+Split                    splitncnn_115            1 2 967 968 969
+BinaryOp                 div_219                  2 1 953 962 970 0=3
+BinaryOp                 mul_220                  2 1 970 944 971 0=2
+Split                    splitncnn_116            1 2 971 972 973
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_6            2 1 968 972 974
+Reshape                  reshape_365              1 1 974 975 0=2 1=48
+Gemm                     gemm_14                  1 1 975 976 10=-1 2=0 3=1 4=0 5=1 6=1 7=48 8=1 9=2
+Reshape                  reshape_366              1 1 976 977 0=1 1=12 2=4
+GELU                     gelu_45                  1 1 977 978
+Permute                  transpose_600            1 1 978 979 0=1
+Reshape                  reshape_367              1 1 979 980 0=12 1=4
+Gemm                     gemm_15                  1 1 980 981 10=-1 2=0 3=1 4=0 5=1 6=1 7=4 8=12 9=12
+Reshape                  reshape_368              1 1 981 982 0=12 1=1 2=4
+Permute                  transpose_601            1 1 982 983 0=1
+Sigmoid                  sigmoid_68               1 1 983 984
+SDPA                     sdpa_659                 3 1 973 969 958 985 5=0 6=1.0
+BinaryOp                 mul_221                  2 1 985 984 986 0=2
+Reshape                  Tensor.reshape_879       2 1 986 942 987 6="1w,1h,48"
+Convolution              conv_133                 1 1 987 988 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=2304
+Convolution              conv_134                 1 1 988 989 0=192 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+BinaryOp                 add_222                  2 1 918 989 990 0=0
+Split                    splitncnn_117            1 3 990 991 992 993
+Permute                  permute_237              1 1 993 994 0=3
+Reshape                  reshape_369              1 1 994 995 0=192 1=-1
+Split                    splitncnn_118            1 3 995 996 997 998
+MemoryData               latent.2.norm2.body      0 1 999 0=192
+Reduction                mean_522                 1 1 998 1000 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_223                  2 1 996 1000 1001 0=1
+Split                    splitncnn_119            1 2 1001 1002 1003
+BinaryOp                 mul_224                  2 1 1002 1003 1004 0=2
+Reduction                mean_523                 1 1 1004 1005 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_225                  1 1 1005 1006 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_226                 1 1 1006 1007 0=5
+BinaryOp                 div_227                  2 1 997 1007 1008 0=3
+Reshape                  reshape_370              1 1 999 1009 0=192 1=1
+BinaryOp                 mul_228                  2 1 1008 1009 1010 0=2
+Reshape                  Tensor.reshape_881       2 1 1010 992 1011 6="192,1w,1h"
+Permute                  permute_238              1 1 1011 1012 0=4
+Convolution              conv_135                 1 1 1012 1013 0=1020 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=195840
+ConvolutionDepthWise     convdw_635               1 1 1013 1014 0=1020 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=9180 7=1020
+Slice                    chunk_18                 1 2 1014 1015 1016 -23300=2,-233,-233 1=0
+GELU                     gelu_46                  1 1 1015 1017
+BinaryOp                 mul_229                  2 1 1017 1016 1018 0=2
+Convolution              conv_136                 1 1 1018 1019 0=192 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=97920
+BinaryOp                 add_230                  2 1 991 1019 1020 0=0
+Split                    splitncnn_120            1 2 1020 1021 1022
+Convolution              conv_137                 1 1 1022 1023 0=48 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+Split                    splitncnn_121            1 2 1023 1024 1025
+Permute                  permute_239              1 1 1025 1026 0=3
+Reshape                  reshape_371              1 1 1026 1027 0=48 1=-1
+Split                    splitncnn_122            1 3 1027 1028 1029 1030
+MemoryData               latent.3.norm1.body      0 1 1031 0=48
+Reduction                mean_524                 1 1 1030 1032 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_231                  2 1 1028 1032 1033 0=1
+Split                    splitncnn_123            1 2 1033 1034 1035
+BinaryOp                 mul_232                  2 1 1034 1035 1036 0=2
+Reduction                mean_525                 1 1 1036 1037 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_233                  1 1 1037 1038 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_234                 1 1 1038 1039 0=5
+BinaryOp                 div_235                  2 1 1029 1039 1040 0=3
+Reshape                  reshape_372              1 1 1031 1041 0=48 1=1
+BinaryOp                 mul_236                  2 1 1040 1041 1042 0=2
+Reshape                  Tensor.reshape_883       2 1 1042 1024 1043 6="48,1w,1h"
+Permute                  permute_240              1 1 1043 1044 0=4
+Split                    splitncnn_124            1 2 1044 1045 1046
+MemoryData               latent.3.attn            0 1 1047 0=1 1=1 2=4
+Convolution              conv_138                 1 1 1046 1048 0=144 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=6912
+ConvolutionDepthWise     convdw_636               1 1 1048 1049 0=144 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=1296 7=144
+Slice                    chunk_19                 1 3 1049 1050 1051 1052 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_373              1 1 1050 1053 0=-1 1=12 2=4
+Split                    splitncnn_125            1 3 1053 1054 1055 1056
+Reshape                  reshape_374              1 1 1051 1057 0=-1 1=12 2=4
+Split                    splitncnn_126            1 3 1057 1058 1059 1060
+Reshape                  reshape_375              1 1 1052 1061 0=-1 1=12 2=4
+BinaryOp                 mul_237                  2 1 1054 1055 1062 0=2
+Reduction                sum_572                  1 1 1062 1063 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_238                 1 1 1063 1064 0=5
+Clip                     clamp_468                1 1 1064 1065 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_239                  2 1 1058 1059 1066 0=2
+Reduction                sum_573                  1 1 1066 1067 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_240                 1 1 1067 1068 0=5
+Clip                     clamp_469                1 1 1068 1069 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_241                  2 1 1060 1069 1070 0=3
+Split                    splitncnn_127            1 2 1070 1071 1072
+BinaryOp                 div_242                  2 1 1056 1065 1073 0=3
+BinaryOp                 mul_243                  2 1 1073 1047 1074 0=2
+Split                    splitncnn_128            1 2 1074 1075 1076
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_7            2 1 1071 1075 1077
+Reshape                  reshape_376              1 1 1077 1078 0=2 1=48
+Gemm                     gemm_16                  1 1 1078 1079 10=-1 2=0 3=1 4=0 5=1 6=1 7=48 8=1 9=2
+Reshape                  reshape_377              1 1 1079 1080 0=1 1=12 2=4
+GELU                     gelu_47                  1 1 1080 1081
+Permute                  transpose_602            1 1 1081 1082 0=1
+Reshape                  reshape_378              1 1 1082 1083 0=12 1=4
+Gemm                     gemm_17                  1 1 1083 1084 10=-1 2=0 3=1 4=0 5=1 6=1 7=4 8=12 9=12
+Reshape                  reshape_379              1 1 1084 1085 0=12 1=1 2=4
+Permute                  transpose_603            1 1 1085 1086 0=1
+Sigmoid                  sigmoid_69               1 1 1086 1087
+SDPA                     sdpa_660                 3 1 1076 1072 1061 1088 5=0 6=1.0
+BinaryOp                 mul_244                  2 1 1088 1087 1089 0=2
+Reshape                  Tensor.reshape_891       2 1 1089 1045 1090 6="1w,1h,48"
+Convolution              conv_139                 1 1 1090 1091 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=2304
+Convolution              conv_140                 1 1 1091 1092 0=192 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=82944
+BinaryOp                 add_245                  2 1 1021 1092 1093 0=0
+Split                    splitncnn_129            1 3 1093 1094 1095 1096
+Permute                  permute_241              1 1 1096 1097 0=3
+Reshape                  reshape_380              1 1 1097 1098 0=192 1=-1
+Split                    splitncnn_130            1 3 1098 1099 1100 1101
+MemoryData               latent.3.norm2.body      0 1 1102 0=192
+Reduction                mean_526                 1 1 1101 1103 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_246                  2 1 1099 1103 1104 0=1
+Split                    splitncnn_131            1 2 1104 1105 1106
+BinaryOp                 mul_247                  2 1 1105 1106 1107 0=2
+Reduction                mean_527                 1 1 1107 1108 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_248                  1 1 1108 1109 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_249                 1 1 1109 1110 0=5
+BinaryOp                 div_250                  2 1 1100 1110 1111 0=3
+Reshape                  reshape_381              1 1 1102 1112 0=192 1=1
+BinaryOp                 mul_251                  2 1 1111 1112 1113 0=2
+Reshape                  Tensor.reshape_893       2 1 1113 1095 1114 6="192,1w,1h"
+Permute                  permute_242              1 1 1114 1115 0=4
+Convolution              conv_141                 1 1 1115 1116 0=1020 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=195840
+ConvolutionDepthWise     convdw_637               1 1 1116 1117 0=1020 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=9180 7=1020
+Slice                    chunk_20                 1 2 1117 1118 1119 -23300=2,-233,-233 1=0
+GELU                     gelu_48                  1 1 1118 1120
+BinaryOp                 mul_252                  2 1 1120 1119 1121 0=2
+Convolution              conv_142                 1 1 1121 1122 0=192 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=97920
+BinaryOp                 add_253                  2 1 1094 1122 1123 0=0
+Convolution              conv_143                 1 1 1123 1124 0=384 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=663552
+PixelShuffle             pixelshuffle_191         1 1 1124 1125 0=2 1=0
+Concat                   cat_1                    2 1 1125 708 1126 0=0
+Convolution              conv_144                 1 1 1126 1127 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=18432
+Split                    splitncnn_132            1 2 1127 1128 1129
+Convolution              conv_145                 1 1 1129 1130 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_133            1 2 1130 1131 1132
+Permute                  permute_243              1 1 1132 1133 0=3
+Reshape                  reshape_382              1 1 1133 1134 0=24 1=-1
+Split                    splitncnn_134            1 3 1134 1135 1136 1137
+MemoryData               decoder_level2.0.norm1.body 0 1 1138 0=24
+Reduction                mean_528                 1 1 1137 1139 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_254                  2 1 1135 1139 1140 0=1
+Split                    splitncnn_135            1 2 1140 1141 1142
+BinaryOp                 mul_255                  2 1 1141 1142 1143 0=2
+Reduction                mean_529                 1 1 1143 1144 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_256                  1 1 1144 1145 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_257                 1 1 1145 1146 0=5
+BinaryOp                 div_258                  2 1 1136 1146 1147 0=3
+Reshape                  reshape_383              1 1 1138 1148 0=24 1=1
+BinaryOp                 mul_259                  2 1 1147 1148 1149 0=2
+Reshape                  Tensor.reshape_895       2 1 1149 1131 1150 6="24,1w,1h"
+Permute                  permute_244              1 1 1150 1151 0=4
+Split                    splitncnn_136            1 2 1151 1152 1153
+MemoryData               decoder_level2.0.attn    0 1 1154 0=1 1=1 2=2
+Convolution              conv_146                 1 1 1153 1155 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_638               1 1 1155 1156 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_21                 1 3 1156 1157 1158 1159 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_384              1 1 1157 1160 0=-1 1=12 2=2
+Split                    splitncnn_137            1 3 1160 1161 1162 1163
+Reshape                  reshape_385              1 1 1158 1164 0=-1 1=12 2=2
+Split                    splitncnn_138            1 3 1164 1165 1166 1167
+Reshape                  reshape_386              1 1 1159 1168 0=-1 1=12 2=2
+BinaryOp                 mul_260                  2 1 1161 1162 1169 0=2
+Reduction                sum_574                  1 1 1169 1170 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_261                 1 1 1170 1171 0=5
+Clip                     clamp_470                1 1 1171 1172 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_262                  2 1 1165 1166 1173 0=2
+Reduction                sum_575                  1 1 1173 1174 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_263                 1 1 1174 1175 0=5
+Clip                     clamp_471                1 1 1175 1176 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_264                  2 1 1167 1176 1177 0=3
+Split                    splitncnn_139            1 2 1177 1178 1179
+BinaryOp                 div_265                  2 1 1163 1172 1180 0=3
+BinaryOp                 mul_266                  2 1 1180 1154 1181 0=2
+Split                    splitncnn_140            1 2 1181 1182 1183
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_8            2 1 1178 1182 1184
+Reshape                  reshape_387              1 1 1184 1185 0=2 1=24
+Gemm                     gemm_18                  1 1 1185 1186 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_388              1 1 1186 1187 0=1 1=12 2=2
+GELU                     gelu_49                  1 1 1187 1188
+Permute                  transpose_604            1 1 1188 1189 0=1
+Reshape                  reshape_389              1 1 1189 1190 0=12 1=2
+Gemm                     gemm_19                  1 1 1190 1191 10=-1 2=0 3=1 4=0 5=1 6=1 7=2 8=12 9=12
+Reshape                  reshape_390              1 1 1191 1192 0=12 1=1 2=2
+Permute                  transpose_605            1 1 1192 1193 0=1
+Sigmoid                  sigmoid_70               1 1 1193 1194
+SDPA                     sdpa_661                 3 1 1183 1179 1168 1195 5=0 6=1.0
+BinaryOp                 mul_267                  2 1 1195 1194 1196 0=2
+Reshape                  Tensor.reshape_903       2 1 1196 1152 1197 6="1w,1h,24"
+Convolution              conv_147                 1 1 1197 1198 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_148                 1 1 1198 1199 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_268                  2 1 1128 1199 1200 0=0
+Split                    splitncnn_141            1 3 1200 1201 1202 1203
+Permute                  permute_245              1 1 1203 1204 0=3
+Reshape                  reshape_391              1 1 1204 1205 0=96 1=-1
+Split                    splitncnn_142            1 3 1205 1206 1207 1208
+MemoryData               decoder_level2.0.norm2.body 0 1 1209 0=96
+Reduction                mean_530                 1 1 1208 1210 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_269                  2 1 1206 1210 1211 0=1
+Split                    splitncnn_143            1 2 1211 1212 1213
+BinaryOp                 mul_270                  2 1 1212 1213 1214 0=2
+Reduction                mean_531                 1 1 1214 1215 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_271                  1 1 1215 1216 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_272                 1 1 1216 1217 0=5
+BinaryOp                 div_273                  2 1 1207 1217 1218 0=3
+Reshape                  reshape_392              1 1 1209 1219 0=96 1=1
+BinaryOp                 mul_274                  2 1 1218 1219 1220 0=2
+Reshape                  Tensor.reshape_905       2 1 1220 1202 1221 6="96,1w,1h"
+Permute                  permute_246              1 1 1221 1222 0=4
+Convolution              conv_149                 1 1 1222 1223 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_639               1 1 1223 1224 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_22                 1 2 1224 1225 1226 -23300=2,-233,-233 1=0
+GELU                     gelu_50                  1 1 1225 1227
+BinaryOp                 mul_275                  2 1 1227 1226 1228 0=2
+Convolution              conv_150                 1 1 1228 1229 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_276                  2 1 1201 1229 1230 0=0
+Split                    splitncnn_144            1 2 1230 1231 1232
+Convolution              conv_151                 1 1 1232 1233 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_145            1 2 1233 1234 1235
+Permute                  permute_247              1 1 1235 1236 0=3
+Reshape                  reshape_393              1 1 1236 1237 0=24 1=-1
+Split                    splitncnn_146            1 3 1237 1238 1239 1240
+MemoryData               decoder_level2.1.norm1.body 0 1 1241 0=24
+Reduction                mean_532                 1 1 1240 1242 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_277                  2 1 1238 1242 1243 0=1
+Split                    splitncnn_147            1 2 1243 1244 1245
+BinaryOp                 mul_278                  2 1 1244 1245 1246 0=2
+Reduction                mean_533                 1 1 1246 1247 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_279                  1 1 1247 1248 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_280                 1 1 1248 1249 0=5
+BinaryOp                 div_281                  2 1 1239 1249 1250 0=3
+Reshape                  reshape_394              1 1 1241 1251 0=24 1=1
+BinaryOp                 mul_282                  2 1 1250 1251 1252 0=2
+Reshape                  Tensor.reshape_907       2 1 1252 1234 1253 6="24,1w,1h"
+Permute                  permute_248              1 1 1253 1254 0=4
+Split                    splitncnn_148            1 2 1254 1255 1256
+MemoryData               decoder_level2.1.attn    0 1 1257 0=1 1=1 2=2
+Convolution              conv_152                 1 1 1256 1258 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_640               1 1 1258 1259 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_23                 1 3 1259 1260 1261 1262 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_395              1 1 1260 1263 0=-1 1=12 2=2
+Split                    splitncnn_149            1 3 1263 1264 1265 1266
+Reshape                  reshape_396              1 1 1261 1267 0=-1 1=12 2=2
+Split                    splitncnn_150            1 3 1267 1268 1269 1270
+Reshape                  reshape_397              1 1 1262 1271 0=-1 1=12 2=2
+BinaryOp                 mul_283                  2 1 1264 1265 1272 0=2
+Reduction                sum_576                  1 1 1272 1273 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_284                 1 1 1273 1274 0=5
+Clip                     clamp_472                1 1 1274 1275 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_285                  2 1 1268 1269 1276 0=2
+Reduction                sum_577                  1 1 1276 1277 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_286                 1 1 1277 1278 0=5
+Clip                     clamp_473                1 1 1278 1279 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_287                  2 1 1270 1279 1280 0=3
+Split                    splitncnn_151            1 2 1280 1281 1282
+BinaryOp                 div_288                  2 1 1266 1275 1283 0=3
+BinaryOp                 mul_289                  2 1 1283 1257 1284 0=2
+Split                    splitncnn_152            1 2 1284 1285 1286
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_9            2 1 1281 1285 1287
+Reshape                  reshape_398              1 1 1287 1288 0=2 1=24
+Gemm                     gemm_20                  1 1 1288 1289 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_399              1 1 1289 1290 0=1 1=12 2=2
+GELU                     gelu_51                  1 1 1290 1291
+Permute                  transpose_606            1 1 1291 1292 0=1
+Reshape                  reshape_400              1 1 1292 1293 0=12 1=2
+Gemm                     gemm_21                  1 1 1293 1294 10=-1 2=0 3=1 4=0 5=1 6=1 7=2 8=12 9=12
+Reshape                  reshape_401              1 1 1294 1295 0=12 1=1 2=2
+Permute                  transpose_607            1 1 1295 1296 0=1
+Sigmoid                  sigmoid_71               1 1 1296 1297
+SDPA                     sdpa_662                 3 1 1286 1282 1271 1298 5=0 6=1.0
+BinaryOp                 mul_290                  2 1 1298 1297 1299 0=2
+Reshape                  Tensor.reshape_915       2 1 1299 1255 1300 6="1w,1h,24"
+Convolution              conv_153                 1 1 1300 1301 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_154                 1 1 1301 1302 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_291                  2 1 1231 1302 1303 0=0
+Split                    splitncnn_153            1 3 1303 1304 1305 1306
+Permute                  permute_249              1 1 1306 1307 0=3
+Reshape                  reshape_402              1 1 1307 1308 0=96 1=-1
+Split                    splitncnn_154            1 3 1308 1309 1310 1311
+MemoryData               decoder_level2.1.norm2.body 0 1 1312 0=96
+Reduction                mean_534                 1 1 1311 1313 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_292                  2 1 1309 1313 1314 0=1
+Split                    splitncnn_155            1 2 1314 1315 1316
+BinaryOp                 mul_293                  2 1 1315 1316 1317 0=2
+Reduction                mean_535                 1 1 1317 1318 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_294                  1 1 1318 1319 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_295                 1 1 1319 1320 0=5
+BinaryOp                 div_296                  2 1 1310 1320 1321 0=3
+Reshape                  reshape_403              1 1 1312 1322 0=96 1=1
+BinaryOp                 mul_297                  2 1 1321 1322 1323 0=2
+Reshape                  Tensor.reshape_917       2 1 1323 1305 1324 6="96,1w,1h"
+Permute                  permute_250              1 1 1324 1325 0=4
+Convolution              conv_155                 1 1 1325 1326 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_641               1 1 1326 1327 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_24                 1 2 1327 1328 1329 -23300=2,-233,-233 1=0
+GELU                     gelu_52                  1 1 1328 1330
+BinaryOp                 mul_298                  2 1 1330 1329 1331 0=2
+Convolution              conv_156                 1 1 1331 1332 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_299                  2 1 1304 1332 1333 0=0
+Split                    splitncnn_156            1 2 1333 1334 1335
+Convolution              conv_157                 1 1 1335 1336 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_157            1 2 1336 1337 1338
+Permute                  permute_251              1 1 1338 1339 0=3
+Reshape                  reshape_404              1 1 1339 1340 0=24 1=-1
+Split                    splitncnn_158            1 3 1340 1341 1342 1343
+MemoryData               decoder_level2.2.norm1.body 0 1 1344 0=24
+Reduction                mean_536                 1 1 1343 1345 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_300                  2 1 1341 1345 1346 0=1
+Split                    splitncnn_159            1 2 1346 1347 1348
+BinaryOp                 mul_301                  2 1 1347 1348 1349 0=2
+Reduction                mean_537                 1 1 1349 1350 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_302                  1 1 1350 1351 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_303                 1 1 1351 1352 0=5
+BinaryOp                 div_304                  2 1 1342 1352 1353 0=3
+Reshape                  reshape_405              1 1 1344 1354 0=24 1=1
+BinaryOp                 mul_305                  2 1 1353 1354 1355 0=2
+Reshape                  Tensor.reshape_919       2 1 1355 1337 1356 6="24,1w,1h"
+Permute                  permute_252              1 1 1356 1357 0=4
+Split                    splitncnn_160            1 2 1357 1358 1359
+MemoryData               decoder_level2.2.attn    0 1 1360 0=1 1=1 2=2
+Convolution              conv_158                 1 1 1359 1361 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_642               1 1 1361 1362 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_25                 1 3 1362 1363 1364 1365 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_406              1 1 1363 1366 0=-1 1=12 2=2
+Split                    splitncnn_161            1 3 1366 1367 1368 1369
+Reshape                  reshape_407              1 1 1364 1370 0=-1 1=12 2=2
+Split                    splitncnn_162            1 3 1370 1371 1372 1373
+Reshape                  reshape_408              1 1 1365 1374 0=-1 1=12 2=2
+BinaryOp                 mul_306                  2 1 1367 1368 1375 0=2
+Reduction                sum_578                  1 1 1375 1376 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_307                 1 1 1376 1377 0=5
+Clip                     clamp_474                1 1 1377 1378 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_308                  2 1 1371 1372 1379 0=2
+Reduction                sum_579                  1 1 1379 1380 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_309                 1 1 1380 1381 0=5
+Clip                     clamp_475                1 1 1381 1382 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_310                  2 1 1373 1382 1383 0=3
+Split                    splitncnn_163            1 2 1383 1384 1385
+BinaryOp                 div_311                  2 1 1369 1378 1386 0=3
+BinaryOp                 mul_312                  2 1 1386 1360 1387 0=2
+Split                    splitncnn_164            1 2 1387 1388 1389
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_10           2 1 1384 1388 1390
+Reshape                  reshape_409              1 1 1390 1391 0=2 1=24
+Gemm                     gemm_22                  1 1 1391 1392 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_410              1 1 1392 1393 0=1 1=12 2=2
+GELU                     gelu_53                  1 1 1393 1394
+Permute                  transpose_608            1 1 1394 1395 0=1
+Reshape                  reshape_411              1 1 1395 1396 0=12 1=2
+Gemm                     gemm_23                  1 1 1396 1397 10=-1 2=0 3=1 4=0 5=1 6=1 7=2 8=12 9=12
+Reshape                  reshape_412              1 1 1397 1398 0=12 1=1 2=2
+Permute                  transpose_609            1 1 1398 1399 0=1
+Sigmoid                  sigmoid_72               1 1 1399 1400
+SDPA                     sdpa_663                 3 1 1389 1385 1374 1401 5=0 6=1.0
+BinaryOp                 mul_313                  2 1 1401 1400 1402 0=2
+Reshape                  Tensor.reshape_927       2 1 1402 1358 1403 6="1w,1h,24"
+Convolution              conv_159                 1 1 1403 1404 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_160                 1 1 1404 1405 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_314                  2 1 1334 1405 1406 0=0
+Split                    splitncnn_165            1 3 1406 1407 1408 1409
+Permute                  permute_253              1 1 1409 1410 0=3
+Reshape                  reshape_413              1 1 1410 1411 0=96 1=-1
+Split                    splitncnn_166            1 3 1411 1412 1413 1414
+MemoryData               decoder_level2.2.norm2.body 0 1 1415 0=96
+Reduction                mean_538                 1 1 1414 1416 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_315                  2 1 1412 1416 1417 0=1
+Split                    splitncnn_167            1 2 1417 1418 1419
+BinaryOp                 mul_316                  2 1 1418 1419 1420 0=2
+Reduction                mean_539                 1 1 1420 1421 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_317                  1 1 1421 1422 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_318                 1 1 1422 1423 0=5
+BinaryOp                 div_319                  2 1 1413 1423 1424 0=3
+Reshape                  reshape_414              1 1 1415 1425 0=96 1=1
+BinaryOp                 mul_320                  2 1 1424 1425 1426 0=2
+Reshape                  Tensor.reshape_929       2 1 1426 1408 1427 6="96,1w,1h"
+Permute                  permute_254              1 1 1427 1428 0=4
+Convolution              conv_161                 1 1 1428 1429 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_643               1 1 1429 1430 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_26                 1 2 1430 1431 1432 -23300=2,-233,-233 1=0
+GELU                     gelu_54                  1 1 1431 1433
+BinaryOp                 mul_321                  2 1 1433 1432 1434 0=2
+Convolution              conv_162                 1 1 1434 1435 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_322                  2 1 1407 1435 1436 0=0
+Convolution              conv_163                 1 1 1436 1437 0=192 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=165888
+PixelShuffle             pixelshuffle_192         1 1 1437 1438 0=2 1=0
+Concat                   cat_2                    2 1 1438 395 1439 0=0
+Split                    splitncnn_168            1 2 1439 1440 1441
+Convolution              conv_164                 1 1 1441 1442 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_169            1 2 1442 1443 1444
+Permute                  permute_255              1 1 1444 1445 0=3
+Reshape                  reshape_415              1 1 1445 1446 0=24 1=-1
+Split                    splitncnn_170            1 3 1446 1447 1448 1449
+MemoryData               decoder_level1.0.norm1.body 0 1 1450 0=24
+Reduction                mean_540                 1 1 1449 1451 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_323                  2 1 1447 1451 1452 0=1
+Split                    splitncnn_171            1 2 1452 1453 1454
+BinaryOp                 mul_324                  2 1 1453 1454 1455 0=2
+Reduction                mean_541                 1 1 1455 1456 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_325                  1 1 1456 1457 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_326                 1 1 1457 1458 0=5
+BinaryOp                 div_327                  2 1 1448 1458 1459 0=3
+Reshape                  reshape_416              1 1 1450 1460 0=24 1=1
+BinaryOp                 mul_328                  2 1 1459 1460 1461 0=2
+Reshape                  Tensor.reshape_931       2 1 1461 1443 1462 6="24,1w,1h"
+Permute                  permute_256              1 1 1462 1463 0=4
+Split                    splitncnn_172            1 2 1463 1464 1465
+MemoryData               decoder_level1.0.attn    0 1 1466 0=1 1=1 2=1
+Convolution              conv_165                 1 1 1465 1467 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_644               1 1 1467 1468 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_27                 1 3 1468 1469 1470 1471 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_417              1 1 1469 1472 0=-1 1=24 2=1
+Split                    splitncnn_173            1 3 1472 1473 1474 1475
+Reshape                  reshape_418              1 1 1470 1476 0=-1 1=24 2=1
+Split                    splitncnn_174            1 3 1476 1477 1478 1479
+Reshape                  reshape_419              1 1 1471 1480 0=-1 1=24 2=1
+BinaryOp                 mul_329                  2 1 1473 1474 1481 0=2
+Reduction                sum_580                  1 1 1481 1482 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_330                 1 1 1482 1483 0=5
+Clip                     clamp_476                1 1 1483 1484 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_331                  2 1 1477 1478 1485 0=2
+Reduction                sum_581                  1 1 1485 1486 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_332                 1 1 1486 1487 0=5
+Clip                     clamp_477                1 1 1487 1488 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_333                  2 1 1479 1488 1489 0=3
+Split                    splitncnn_175            1 2 1489 1490 1491
+BinaryOp                 div_334                  2 1 1475 1484 1492 0=3
+BinaryOp                 mul_335                  2 1 1492 1466 1493 0=2
+Split                    splitncnn_176            1 2 1493 1494 1495
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_11           2 1 1490 1494 1496
+Reshape                  reshape_420              1 1 1496 1497 0=2 1=24
+Gemm                     gemm_24                  1 1 1497 1498 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_421              1 1 1498 1499 0=1 1=24 2=1
+GELU                     gelu_55                  1 1 1499 1500
+Permute                  transpose_610            1 1 1500 1501 0=1
+Reshape                  reshape_422              1 1 1501 1502 0=24 1=1
+Gemm                     gemm_25                  1 1 1502 1503 10=-1 2=0 3=1 4=0 5=1 6=1 7=1 8=24 9=24
+Reshape                  reshape_423              1 1 1503 1504 0=24 1=1 2=1
+Permute                  transpose_611            1 1 1504 1505 0=1
+Sigmoid                  sigmoid_73               1 1 1505 1506
+SDPA                     sdpa_664                 3 1 1495 1491 1480 1507 5=0 6=1.0
+BinaryOp                 mul_336                  2 1 1507 1506 1508 0=2
+Reshape                  Tensor.reshape_939       2 1 1508 1464 1509 6="1w,1h,24"
+Convolution              conv_166                 1 1 1509 1510 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_167                 1 1 1510 1511 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_337                  2 1 1440 1511 1512 0=0
+Split                    splitncnn_177            1 3 1512 1513 1514 1515
+Permute                  permute_257              1 1 1515 1516 0=3
+Reshape                  reshape_424              1 1 1516 1517 0=96 1=-1
+Split                    splitncnn_178            1 3 1517 1518 1519 1520
+MemoryData               decoder_level1.0.norm2.body 0 1 1521 0=96
+Reduction                mean_542                 1 1 1520 1522 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_338                  2 1 1518 1522 1523 0=1
+Split                    splitncnn_179            1 2 1523 1524 1525
+BinaryOp                 mul_339                  2 1 1524 1525 1526 0=2
+Reduction                mean_543                 1 1 1526 1527 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_340                  1 1 1527 1528 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_341                 1 1 1528 1529 0=5
+BinaryOp                 div_342                  2 1 1519 1529 1530 0=3
+Reshape                  reshape_425              1 1 1521 1531 0=96 1=1
+BinaryOp                 mul_343                  2 1 1530 1531 1532 0=2
+Reshape                  Tensor.reshape_941       2 1 1532 1514 1533 6="96,1w,1h"
+Permute                  permute_258              1 1 1533 1534 0=4
+Convolution              conv_168                 1 1 1534 1535 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_645               1 1 1535 1536 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_28                 1 2 1536 1537 1538 -23300=2,-233,-233 1=0
+GELU                     gelu_56                  1 1 1537 1539
+BinaryOp                 mul_344                  2 1 1539 1538 1540 0=2
+Convolution              conv_169                 1 1 1540 1541 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_345                  2 1 1513 1541 1542 0=0
+Split                    splitncnn_180            1 2 1542 1543 1544
+Convolution              conv_170                 1 1 1544 1545 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_181            1 2 1545 1546 1547
+Permute                  permute_259              1 1 1547 1548 0=3
+Reshape                  reshape_426              1 1 1548 1549 0=24 1=-1
+Split                    splitncnn_182            1 3 1549 1550 1551 1552
+MemoryData               decoder_level1.1.norm1.body 0 1 1553 0=24
+Reduction                mean_544                 1 1 1552 1554 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_346                  2 1 1550 1554 1555 0=1
+Split                    splitncnn_183            1 2 1555 1556 1557
+BinaryOp                 mul_347                  2 1 1556 1557 1558 0=2
+Reduction                mean_545                 1 1 1558 1559 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_348                  1 1 1559 1560 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_349                 1 1 1560 1561 0=5
+BinaryOp                 div_350                  2 1 1551 1561 1562 0=3
+Reshape                  reshape_427              1 1 1553 1563 0=24 1=1
+BinaryOp                 mul_351                  2 1 1562 1563 1564 0=2
+Reshape                  Tensor.reshape_943       2 1 1564 1546 1565 6="24,1w,1h"
+Permute                  permute_260              1 1 1565 1566 0=4
+Split                    splitncnn_184            1 2 1566 1567 1568
+MemoryData               decoder_level1.1.attn    0 1 1569 0=1 1=1 2=1
+Convolution              conv_171                 1 1 1568 1570 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_646               1 1 1570 1571 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_29                 1 3 1571 1572 1573 1574 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_428              1 1 1572 1575 0=-1 1=24 2=1
+Split                    splitncnn_185            1 3 1575 1576 1577 1578
+Reshape                  reshape_429              1 1 1573 1579 0=-1 1=24 2=1
+Split                    splitncnn_186            1 3 1579 1580 1581 1582
+Reshape                  reshape_430              1 1 1574 1583 0=-1 1=24 2=1
+BinaryOp                 mul_352                  2 1 1576 1577 1584 0=2
+Reduction                sum_582                  1 1 1584 1585 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_353                 1 1 1585 1586 0=5
+Clip                     clamp_478                1 1 1586 1587 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_354                  2 1 1580 1581 1588 0=2
+Reduction                sum_583                  1 1 1588 1589 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_355                 1 1 1589 1590 0=5
+Clip                     clamp_479                1 1 1590 1591 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_356                  2 1 1582 1591 1592 0=3
+Split                    splitncnn_187            1 2 1592 1593 1594
+BinaryOp                 div_357                  2 1 1578 1587 1595 0=3
+BinaryOp                 mul_358                  2 1 1595 1569 1596 0=2
+Split                    splitncnn_188            1 2 1596 1597 1598
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_12           2 1 1593 1597 1599
+Reshape                  reshape_431              1 1 1599 1600 0=2 1=24
+Gemm                     gemm_26                  1 1 1600 1601 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_432              1 1 1601 1602 0=1 1=24 2=1
+GELU                     gelu_57                  1 1 1602 1603
+Permute                  transpose_612            1 1 1603 1604 0=1
+Reshape                  reshape_433              1 1 1604 1605 0=24 1=1
+Gemm                     gemm_27                  1 1 1605 1606 10=-1 2=0 3=1 4=0 5=1 6=1 7=1 8=24 9=24
+Reshape                  reshape_434              1 1 1606 1607 0=24 1=1 2=1
+Permute                  transpose_613            1 1 1607 1608 0=1
+Sigmoid                  sigmoid_74               1 1 1608 1609
+SDPA                     sdpa_665                 3 1 1598 1594 1583 1610 5=0 6=1.0
+BinaryOp                 mul_359                  2 1 1610 1609 1611 0=2
+Reshape                  Tensor.reshape_951       2 1 1611 1567 1612 6="1w,1h,24"
+Convolution              conv_172                 1 1 1612 1613 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_173                 1 1 1613 1614 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_360                  2 1 1543 1614 1615 0=0
+Split                    splitncnn_189            1 3 1615 1616 1617 1618
+Permute                  permute_261              1 1 1618 1619 0=3
+Reshape                  reshape_435              1 1 1619 1620 0=96 1=-1
+Split                    splitncnn_190            1 3 1620 1621 1622 1623
+MemoryData               decoder_level1.1.norm2.body 0 1 1624 0=96
+Reduction                mean_546                 1 1 1623 1625 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_361                  2 1 1621 1625 1626 0=1
+Split                    splitncnn_191            1 2 1626 1627 1628
+BinaryOp                 mul_362                  2 1 1627 1628 1629 0=2
+Reduction                mean_547                 1 1 1629 1630 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_363                  1 1 1630 1631 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_364                 1 1 1631 1632 0=5
+BinaryOp                 div_365                  2 1 1622 1632 1633 0=3
+Reshape                  reshape_436              1 1 1624 1634 0=96 1=1
+BinaryOp                 mul_366                  2 1 1633 1634 1635 0=2
+Reshape                  Tensor.reshape_953       2 1 1635 1617 1636 6="96,1w,1h"
+Permute                  permute_262              1 1 1636 1637 0=4
+Convolution              conv_174                 1 1 1637 1638 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_647               1 1 1638 1639 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_30                 1 2 1639 1640 1641 -23300=2,-233,-233 1=0
+GELU                     gelu_58                  1 1 1640 1642
+BinaryOp                 mul_367                  2 1 1642 1641 1643 0=2
+Convolution              conv_175                 1 1 1643 1644 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_368                  2 1 1616 1644 1645 0=0
+Split                    splitncnn_192            1 2 1645 1646 1647
+Convolution              conv_176                 1 1 1647 1648 0=24 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+Split                    splitncnn_193            1 2 1648 1649 1650
+Permute                  permute_263              1 1 1650 1651 0=3
+Reshape                  reshape_437              1 1 1651 1652 0=24 1=-1
+Split                    splitncnn_194            1 3 1652 1653 1654 1655
+MemoryData               refinement.0.norm1.body  0 1 1656 0=24
+Reduction                mean_548                 1 1 1655 1657 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_369                  2 1 1653 1657 1658 0=1
+Split                    splitncnn_195            1 2 1658 1659 1660
+BinaryOp                 mul_370                  2 1 1659 1660 1661 0=2
+Reduction                mean_549                 1 1 1661 1662 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_371                  1 1 1662 1663 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_372                 1 1 1663 1664 0=5
+BinaryOp                 div_373                  2 1 1654 1664 1665 0=3
+Reshape                  reshape_438              1 1 1656 1666 0=24 1=1
+BinaryOp                 mul_374                  2 1 1665 1666 1667 0=2
+Reshape                  Tensor.reshape_955       2 1 1667 1649 1668 6="24,1w,1h"
+Permute                  permute_264              1 1 1668 1669 0=4
+Split                    splitncnn_196            1 2 1669 1670 1671
+MemoryData               refinement.0.attn        0 1 1672 0=1 1=1 2=1
+Convolution              conv_177                 1 1 1671 1673 0=72 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=1728
+ConvolutionDepthWise     convdw_648               1 1 1673 1674 0=72 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=648 7=72
+Slice                    chunk_31                 1 3 1674 1675 1676 1677 -23300=3,-233,-233,-233 1=0
+Reshape                  reshape_439              1 1 1675 1678 0=-1 1=24 2=1
+Split                    splitncnn_197            1 3 1678 1679 1680 1681
+Reshape                  reshape_440              1 1 1676 1682 0=-1 1=24 2=1
+Split                    splitncnn_198            1 3 1682 1683 1684 1685
+Reshape                  reshape_441              1 1 1677 1686 0=-1 1=24 2=1
+BinaryOp                 mul_375                  2 1 1679 1680 1687 0=2
+Reduction                sum_584                  1 1 1687 1688 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_376                 1 1 1688 1689 0=5
+Clip                     clamp_480                1 1 1689 1690 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 mul_377                  2 1 1683 1684 1691 0=2
+Reduction                sum_585                  1 1 1691 1692 0=0 1=0 -23303=1,2 4=1 5=1
+UnaryOp                  sqrt_378                 1 1 1692 1693 0=5
+Clip                     clamp_481                1 1 1693 1694 0=1.000000e-12 1=3.40282347e38
+BinaryOp                 div_379                  2 1 1685 1694 1695 0=3
+Split                    splitncnn_199            1 2 1695 1696 1697
+BinaryOp                 div_380                  2 1 1681 1690 1698 0=3
+BinaryOp                 mul_381                  2 1 1698 1672 1699 0=2
+Split                    splitncnn_200            1 2 1699 1700 1701
+archs.realviformer_arch.AttentionMaskDescriptor pnnx_unique_13           2 1 1696 1700 1702
+Reshape                  reshape_442              1 1 1702 1703 0=2 1=24
+Gemm                     gemm_28                  1 1 1703 1704 10=-1 2=0 3=1 4=0 5=1 6=1 7=24 8=1 9=2
+Reshape                  reshape_443              1 1 1704 1705 0=1 1=24 2=1
+GELU                     gelu_59                  1 1 1705 1706
+Permute                  transpose_614            1 1 1706 1707 0=1
+Reshape                  reshape_444              1 1 1707 1708 0=24 1=1
+Gemm                     gemm_29                  1 1 1708 1709 10=-1 2=0 3=1 4=0 5=1 6=1 7=1 8=24 9=24
+Reshape                  reshape_445              1 1 1709 1710 0=24 1=1 2=1
+Permute                  transpose_615            1 1 1710 1711 0=1
+Sigmoid                  sigmoid_75               1 1 1711 1712
+SDPA                     sdpa_666                 3 1 1701 1697 1686 1713 5=0 6=1.0
+BinaryOp                 mul_382                  2 1 1713 1712 1714 0=2
+Reshape                  Tensor.reshape_963       2 1 1714 1670 1715 6="1w,1h,24"
+Convolution              conv_178                 1 1 1715 1716 0=24 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=576
+Convolution              conv_179                 1 1 1716 1717 0=96 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=20736
+BinaryOp                 add_383                  2 1 1646 1717 1718 0=0
+Split                    splitncnn_201            1 3 1718 1719 1720 1721
+Permute                  permute_265              1 1 1721 1722 0=3
+Reshape                  reshape_446              1 1 1722 1723 0=96 1=-1
+Split                    splitncnn_202            1 3 1723 1724 1725 1726
+MemoryData               refinement.0.norm2.body  0 1 1727 0=96
+Reduction                mean_550                 1 1 1726 1728 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 sub_384                  2 1 1724 1728 1729 0=1
+Split                    splitncnn_203            1 2 1729 1730 1731
+BinaryOp                 mul_385                  2 1 1730 1731 1732 0=2
+Reduction                mean_551                 1 1 1732 1733 0=3 1=0 -23303=1,1 4=1 5=1
+BinaryOp                 add_386                  1 1 1733 1734 0=0 1=1 2=1.000000e-5
+UnaryOp                  sqrt_387                 1 1 1734 1735 0=5
+BinaryOp                 div_388                  2 1 1725 1735 1736 0=3
+Reshape                  reshape_447              1 1 1727 1737 0=96 1=1
+BinaryOp                 mul_389                  2 1 1736 1737 1738 0=2
+Reshape                  Tensor.reshape_965       2 1 1738 1720 1739 6="96,1w,1h"
+Permute                  permute_266              1 1 1739 1740 0=4
+Convolution              conv_180                 1 1 1740 1741 0=510 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=48960
+ConvolutionDepthWise     convdw_649               1 1 1741 1742 0=510 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=0 6=4590 7=510
+Slice                    chunk_32                 1 2 1742 1743 1744 -23300=2,-233,-233 1=0
+GELU                     gelu_60                  1 1 1743 1745
+BinaryOp                 mul_390                  2 1 1745 1744 1746 0=2
+Convolution              conv_181                 1 1 1746 1747 0=96 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=0 6=24480
+BinaryOp                 add_391                  2 1 1719 1747 1748 0=0
+Split                    splitncnn_204            1 2 1748 1749 1750
+Convolution              conv_182                 1 1 1750 out1 0=48 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=4608
+Convolution              conv_183                 1 1 1749 1752 0=192 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=165888
+PixelShuffle             pixelshuffle_193         1 1 1752 1753 0=2 1=0
+ReLU                     leakyrelu_188            1 1 1753 1754 0=0.1
+Convolution              conv_184                 1 1 1754 1755 0=256 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=110592
+PixelShuffle             pixelshuffle_194         1 1 1755 1756 0=2 1=0
+ReLU                     leakyrelu_189            1 1 1756 1757 0=0.1
+Convolution              convrelu_0               1 1 1757 1758 0=64 1=3 -23310=1,0.1 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=36864 9=2
+Convolution              conv_186                 1 1 1758 1759 0=3 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=1728
+Interp                   upsample_76              1 1 1 1760 0=2 1=4.0 2=4.0 6=0
+BinaryOp                 add_392                  2 1 1759 1760 out0 0=0

@@ -25,6 +25,23 @@ Regenerate it with `vulkan/tools/export_weights.py`. The native container uses
 sorted tensor names, explicit shapes and offsets, and 64-byte-aligned data so
 the runtime can upload the payload without loading Python or PyTorch.
 
+The first ncnn deployment graph is also bundled:
+
+```text
+pretrained_model/ncnn/frame_core.param
+pretrained_model/ncnn/frame_core.bin
+```
+
+- Parameter SHA-256: `912ddc0d80451327eb59d15a6c48728194bd0fdd1669c6b90239b6c407cd031c`
+- Weight SHA-256: `2d87a8992b7952b2b89db92ce9b2e816566ce69cf0f038bffffac9e244abcefd`
+- Contents: one x4 recurrent frame pass after optical-flow alignment
+- Precision: FP32 parameters and FP32 arithmetic
+
+The graph uses ncnn's Vulkan SDPA implementation and a portable custom Vulkan
+operator for the learned attention-mask descriptor. SPyNet optical flow and
+feature warping will be added as separate graphs and kernels. No artifact in
+this repository requires a Google Drive download.
+
 The upstream project contains an MIT license but does not state a separate
 license specifically for the checkpoint. This fork does not assert additional
 rights over the pretrained parameters.

@@ -6,6 +6,20 @@ from .arch_util import ResidualBlockNoBN, flow_warp, make_layer, LayerNorm, Chan
 from .spynet_arch import SpyNet
 from einops import rearrange
 import numbers
+
+
+def variance_last(x):
+    """Population variance expressed with deployment-friendly primitives."""
+    centered = x - x.mean(-1, keepdim=True)
+    return (centered * centered).mean(-1, keepdim=True)
+
+
+def normalize_last(x, eps=1e-12):
+    """L2-normalize the final dimension without a rank-specific operator."""
+    norm = torch.clamp(torch.sqrt((x * x).sum(-1, keepdim=True)), min=eps)
+    return x / norm
+
+
 ##########################################################################
 ## Layer Norm
 
@@ -28,7 +42,7 @@ class BiasFree_LayerNorm(nn.Module):
         self.normalized_shape = normalized_shape
 
     def forward(self, x):
-        sigma = x.var(-1, keepdim=True, unbiased=False)
+        sigma = variance_last(x)
         return x / torch.sqrt(sigma+1e-5) * self.weight
 
 class WithBias_LayerNorm(nn.Module):
@@ -46,7 +60,7 @@ class WithBias_LayerNorm(nn.Module):
 
     def forward(self, x):
         mu = x.mean(-1, keepdim=True)
-        sigma = x.var(-1, keepdim=True, unbiased=False)
+        sigma = variance_last(x)
         return (x - mu) / torch.sqrt(sigma+1e-5) * self.weight + self.bias
 
 
@@ -89,6 +103,24 @@ class FeedForward(nn.Module):
 
 ##########################################################################
 ## Multi-DConv Head Transposed Self-Attention (MDTA)
+class AttentionMaskDescriptor(nn.Module):
+    """Reduce channel-correlation logits to max/mean mask descriptors.
+
+    PNNX keeps this module intact so the Vulkan backend can compute the two
+    reductions without materializing the full attention matrix.
+    """
+
+    def forward(self, q, k):
+        logits = q @ k.transpose(-2, -1)
+        return torch.cat(
+            [
+                torch.amax(logits, dim=-1, keepdim=True),
+                torch.mean(logits, dim=-1, keepdim=True),
+            ],
+            dim=-1,
+        )
+
+
 class Attention(nn.Module):
     def __init__(self, dim, num_heads, bias, withmask=False):
         super(Attention, self).__init__()
@@ -100,8 +132,7 @@ class Attention(nn.Module):
         self.project_out = nn.Conv2d(dim, dim, kernel_size=1, bias=bias)
         self.withmask = withmask
         if withmask:
-            self.max_dsc = nn.AdaptiveMaxPool1d(1)
-            self.avg_dsc = nn.AdaptiveAvgPool1d(1)
+            self.mask_descriptor = AttentionMaskDescriptor()
             self.linear1 = nn.Linear(2, 1, bias=bias)
             self.linear2 = nn.Linear(dim//num_heads, dim//num_heads, bias=bias)
 
@@ -116,21 +147,18 @@ class Attention(nn.Module):
         v = rearrange(v, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
     
             
-        q = torch.nn.functional.normalize(q, dim=-1)
-        k = torch.nn.functional.normalize(k, dim=-1)
+        q = normalize_last(q)
+        k = normalize_last(k)
 
-        attn = (q @ k.transpose(-2, -1)) * self.temperature # b, h, c, c
-        
+        scaled_q = q * self.temperature
+
         if self.withmask:
-            mask_in = attn.clone()
-            b_, h_, c_, _ = mask_in.shape 
-            dsc = torch.cat([self.max_dsc(mask_in.reshape(b_, h_*c_, c_)), self.avg_dsc(mask_in.reshape((b_, h_*c_, c_)))], dim=-1).reshape(b_, h_, c_, 2) # b,h,c,2
+            dsc = self.mask_descriptor(scaled_q, k) # b,h,c,2
             mask = self.linear1(dsc) # b,h,c,1
             mask = self.linear2(F.gelu(mask).transpose(-2,-1)).transpose(-2,-1) # b, h, c, 1
             mask = F.sigmoid(mask)
         
-        attn = attn.softmax(dim=-1)
-        out = (attn @ v)
+        out = F.scaled_dot_product_attention(scaled_q, k, v, scale=1.0)
         
         if self.withmask:
             out = out * mask
@@ -339,4 +367,3 @@ class ConvResidualBlocks(nn.Module):
 
     def forward(self, fea):
         return self.main(fea)
-
