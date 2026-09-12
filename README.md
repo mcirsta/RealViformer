@@ -4,6 +4,10 @@
 Yuehan Zhang, Angela Yao  
 National University of Singapore
 
+> This fork is adding a portable Vulkan inference backend for AMD, NVIDIA, and
+> other conformant Vulkan devices. The original PyTorch implementation remains
+> available as the correctness reference.
+
 ## Key Insights
 In this paper, we focus on investigating spatial and channel attention under real-world VSR settings:
 - we investigate the sensitivity of two attention mechanisms to degraded queries and compare them for temporal feature aggregation;
@@ -23,7 +27,7 @@ PyTorch > 1.12
 #### Install RealViformer
 ```sh
 # Clone the repository
-git clone https://github.com/Yuehan717/RealViformer.git
+git clone https://github.com/mcirsta/RealViformer.git
 
 # Navigate into the repository
 cd RealViformer
@@ -37,12 +41,14 @@ pip install -r requirements.txt
   - Real-world datasets: VideoLQ, RealVSR
   - Synthetic datasets: REDS-test, UDM10; the degradation is synthesized with the same degradation pipeline in training.
 ## Usage
-As RealViformer focuses on architecture design, we only provide testing scripts. The pretrained model is available [here](https://drive.google.com/drive/folders/1UzDfFSy5oELl7Z-umF_QhMQhUbUU378y?usp=sharing).
+The official pretrained checkpoint is included in this repository at
+`pretrained_model/weights.pth`; no separate model download is required. Its
+SHA-256 checksum is documented in [MODEL.md](MODEL.md).
+
 ```sh
 python inference_realviformer.py --model_path pretrained_model/weights.pth --input_path [path to video folder] --save_path results/ --interval 100
 ```
 
 ## Acknowledgement
 The code is based on [BasicVSR](https://github.com/ckkelvinchan/BasicVSR-IconVSR) and [Restormer](https://github.com/swz30/Restormer). Thanks to their great work!
-
 
