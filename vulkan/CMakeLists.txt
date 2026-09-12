@@ -18,7 +18,7 @@ add_custom_command(
 
 add_custom_target(realviformer_vulkan_shaders DEPENDS "${AXPY_BINARY}")
 
-add_executable(rvf-vulkan src/main.cpp)
+add_executable(rvf-vulkan src/main.cpp src/weights.cpp)
 add_dependencies(rvf-vulkan realviformer_vulkan_shaders)
 target_compile_features(rvf-vulkan PRIVATE cxx_std_20)
 target_compile_options(

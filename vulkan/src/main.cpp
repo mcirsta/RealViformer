@@ -1,5 +1,7 @@
 #include <vulkan/vulkan.h>
 
+#include "weights.hpp"
+
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -55,6 +57,7 @@ struct Arguments {
     bool smoke_test = true;
     std::string device_selector = "auto";
     std::optional<std::uint64_t> vram_limit;
+    std::optional<std::string> model_path;
     std::uint64_t reserve = 192ull * kMiB;
 };
 
@@ -64,6 +67,7 @@ void print_usage(const char* executable) {
         << "  --list                     list usable Vulkan compute devices\n"
         << "  --device <auto|index|text> select a device\n"
         << "  --vram-limit-gib <auto|N>  optional hard ceiling over live budget\n"
+        << "  --model <weights.rvf>       validate and upload native weights\n"
         << "  --reserve-mib <N>          live-budget safety reserve (default 192)\n"
         << "  --validation               enable Vulkan validation layers\n"
         << "  --no-smoke-test            report capabilities without dispatching\n"
@@ -102,6 +106,8 @@ Arguments parse_arguments(int argc, char** argv) {
                 arguments.vram_limit =
                     static_cast<std::uint64_t>(parsed * static_cast<double>(kGiB));
             }
+        } else if (option == "--model") {
+            arguments.model_path = value();
         } else if (option == "--help" || option == "-h") {
             print_usage(argv[0]);
             std::exit(0);
@@ -877,6 +883,118 @@ void run_smoke_test(const DeviceCandidate& physical,
               << " ms submit-to-fence)\n";
 }
 
+void upload_and_verify_weights(const DeviceCandidate& physical,
+                               const LogicalDevice& logical,
+                               const MemoryPlan& plan,
+                               const rvf::WeightFile& weights) {
+    const std::span<const std::byte> data = weights.data();
+    if (data.empty()) {
+        throw std::runtime_error("native model contains no weight data");
+    }
+    if (data.size() > plan.ceiling) {
+        throw std::runtime_error("model weights exceed the dynamic VRAM ceiling");
+    }
+
+    Buffer upload = create_buffer(
+        logical.handle, physical.memory, data.size(),
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    Buffer download = create_buffer(
+        logical.handle, physical.memory, data.size(),
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    Buffer device_weights = create_buffer(
+        logical.handle, physical.memory, data.size(),
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    void* mapped = nullptr;
+    check(vkMapMemory(logical.handle, upload.memory, 0, upload.size, 0, &mapped),
+          "map model upload buffer");
+    std::memcpy(mapped, data.data(), data.size());
+    if (!(upload.properties & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
+        VkMappedMemoryRange range{VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE};
+        range.memory = upload.memory;
+        range.size = VK_WHOLE_SIZE;
+        check(vkFlushMappedMemoryRanges(logical.handle, 1, &range),
+              "flush model upload buffer");
+    }
+    vkUnmapMemory(logical.handle, upload.memory);
+
+    VkCommandPoolCreateInfo pool_create{
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
+    pool_create.queueFamilyIndex = physical.compute_queue;
+    VkCommandPool pool = VK_NULL_HANDLE;
+    check(vkCreateCommandPool(logical.handle, &pool_create, nullptr, &pool),
+          "create model upload command pool");
+    VkCommandBufferAllocateInfo command_allocate{
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+    command_allocate.commandPool = pool;
+    command_allocate.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    command_allocate.commandBufferCount = 1;
+    VkCommandBuffer command = VK_NULL_HANDLE;
+    check(vkAllocateCommandBuffers(logical.handle, &command_allocate, &command),
+          "allocate model upload command buffer");
+    VkCommandBufferBeginInfo begin{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+    begin.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    check(vkBeginCommandBuffer(command, &begin), "begin model upload");
+    VkBufferCopy region{0, 0, data.size()};
+    vkCmdCopyBuffer(command, upload.handle, device_weights.handle, 1, &region);
+    VkBufferMemoryBarrier barrier{VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER};
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.buffer = device_weights.handle;
+    barrier.size = VK_WHOLE_SIZE;
+    vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 1,
+                         &barrier, 0, nullptr);
+    vkCmdCopyBuffer(command, device_weights.handle, download.handle, 1, &region);
+    check(vkEndCommandBuffer(command), "end model upload");
+
+    VkFenceCreateInfo fence_create{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+    VkFence fence = VK_NULL_HANDLE;
+    check(vkCreateFence(logical.handle, &fence_create, nullptr, &fence),
+          "create model upload fence");
+    VkSubmitInfo submit{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+    submit.commandBufferCount = 1;
+    submit.pCommandBuffers = &command;
+    const auto start = std::chrono::steady_clock::now();
+    check(vkQueueSubmit(logical.queue, 1, &submit, fence), "submit model upload");
+    check(vkWaitForFences(logical.handle, 1, &fence, VK_TRUE,
+                          std::numeric_limits<std::uint64_t>::max()),
+          "wait for model upload");
+    const auto elapsed = std::chrono::steady_clock::now() - start;
+
+    check(vkMapMemory(logical.handle, download.memory, 0, download.size, 0,
+                      &mapped),
+          "map model verification buffer");
+    if (!(download.properties & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
+        VkMappedMemoryRange range{VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE};
+        range.memory = download.memory;
+        range.size = VK_WHOLE_SIZE;
+        check(vkInvalidateMappedMemoryRanges(logical.handle, 1, &range),
+              "invalidate model verification buffer");
+    }
+    const bool matches = std::memcmp(mapped, data.data(), data.size()) == 0;
+    vkUnmapMemory(logical.handle, download.memory);
+    vkDestroyFence(logical.handle, fence, nullptr);
+    vkDestroyCommandPool(logical.handle, pool, nullptr);
+    if (!matches) {
+        throw std::runtime_error("GPU model upload verification failed");
+    }
+    std::cout << "Model upload: PASS (" << weights.tensors().size()
+              << " tensors, " << std::fixed << std::setprecision(2)
+              << static_cast<double>(data.size()) / static_cast<double>(kMiB)
+              << " MiB, upload plus readback "
+              << std::chrono::duration<double, std::milli>(elapsed).count()
+              << " ms)\n";
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -909,6 +1027,10 @@ int main(int argc, char** argv) {
         LogicalDevice logical = create_logical_device(physical);
         if (arguments.smoke_test) {
             run_smoke_test(physical, logical, plan);
+        }
+        if (arguments.model_path) {
+            const rvf::WeightFile weights(*arguments.model_path);
+            upload_and_verify_weights(physical, logical, plan, weights);
         }
         return 0;
     } catch (const std::exception& error) {

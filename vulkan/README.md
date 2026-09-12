@@ -12,6 +12,7 @@ The first milestone provides:
 - a dynamic allocation ceiling with a configurable safety reserve;
 - FP16 storage/arithmetic capability reporting;
 - a device-local transfer, compute, synchronization, and readback smoke test.
+- a deterministic native weight container and verified VRAM upload path.
 
 Model inference kernels are not implemented yet. The PyTorch path remains the
 reference used to validate each Vulkan operation as it is added.
@@ -29,6 +30,15 @@ cmake --build build/vulkan
 ./build/vulkan/rvf-vulkan --validation
 ```
 
+Generate and validate the native model file:
+
+```sh
+python vulkan/tools/export_weights.py \
+    pretrained_model/weights.pth pretrained_model/weights.rvf
+./build/vulkan/rvf-vulkan --validation \
+    --model pretrained_model/weights.rvf
+```
+
 By default, the ceiling is the driver's live device-local memory budget minus
 a 192 MiB safety reserve. On the initial RX 550 system this targets about
 2.6--2.7 GiB while KDE is active. It does not preallocate that amount.
@@ -40,4 +50,3 @@ Useful overrides:
 ./build/vulkan/rvf-vulkan --device "RX 550"
 ./build/vulkan/rvf-vulkan --vram-limit-gib 2.65 --reserve-mib 192
 ```
-
