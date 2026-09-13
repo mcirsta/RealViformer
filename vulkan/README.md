@@ -15,10 +15,13 @@ The first milestone provides:
 - a deterministic native weight container and verified VRAM upload path.
 - a numerically validated ncnn frame-core graph;
 - native Vulkan scaled-dot-product attention and mask-descriptor execution.
+- portable Vulkan bilinear flow warping with zero and border padding;
+- a dynamic ncnn graph containing all six learned SPyNet refinement stages.
 
-The frame core runs on Vulkan now. Optical flow, feature warping, tiled x4
-reconstruction, video I/O, and the hard dynamic-memory enforcement path remain
-under development. The PyTorch path is the correctness reference.
+The frame core, learned SPyNet stages, and feature-warp primitive run on Vulkan
+now. Integrating the SPyNet pyramid scheduler, tiled x4 reconstruction, video
+I/O, and the hard dynamic-memory enforcement path remain under development.
+The PyTorch path is the correctness reference.
 
 ## Build
 
@@ -58,6 +61,31 @@ python vulkan/tools/export_frame_core.py \
     /tmp/realviformer-frame-core-fixture --vulkan
 ```
 
+Validate the flow-warp primitive on CPU and Vulkan:
+
+```sh
+./build/vulkan/rvf-flow-warp-test
+./build/vulkan/rvf-flow-warp-test --vulkan
+```
+
+Validate the six learned SPyNet stages:
+
+```sh
+python vulkan/tools/export_spynet_modules.py \
+    pretrained_model/weights.pth /tmp/realviformer-spynet.pt \
+    --fixture-dir /tmp/realviformer-spynet-fixture
+
+./build/vulkan/rvf-spynet-test \
+    pretrained_model/ncnn/spynet.param \
+    pretrained_model/ncnn/spynet.bin \
+    /tmp/realviformer-spynet-fixture
+
+./build/vulkan/rvf-spynet-test \
+    pretrained_model/ncnn/spynet.param \
+    pretrained_model/ncnn/spynet.bin \
+    /tmp/realviformer-spynet-fixture --vulkan
+```
+
 The ncnn graph is exported with PNNX while preserving
 `archs.realviformer_arch.AttentionMaskDescriptor` as a module operator. This
 removes generic matrix multiplication from the deployed graph and keeps the
@@ -68,6 +96,10 @@ submodule:
 
 ```sh
 python vulkan/tools/export_ncnn_frame_core.py \
+    pretrained_model/weights.pth pretrained_model/ncnn \
+    --pnnx /path/to/pnnx
+
+python vulkan/tools/export_ncnn_spynet.py \
     pretrained_model/weights.pth pretrained_model/ncnn \
     --pnnx /path/to/pnnx
 ```

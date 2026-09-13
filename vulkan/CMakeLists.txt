@@ -55,3 +55,18 @@ target_include_directories(rvf-frame-core-test PRIVATE "${CMAKE_CURRENT_SOURCE_D
 target_compile_features(rvf-frame-core-test PRIVATE cxx_std_20)
 target_compile_options(rvf-frame-core-test PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(rvf-frame-core-test PRIVATE ncnn)
+
+add_executable(
+    rvf-flow-warp-test
+    tests/flow_warp_test.cpp
+    src/flow_warp.cpp
+)
+target_include_directories(rvf-flow-warp-test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_compile_features(rvf-flow-warp-test PRIVATE cxx_std_20)
+target_compile_options(rvf-flow-warp-test PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-flow-warp-test PRIVATE ncnn)
+
+add_executable(rvf-spynet-test tests/spynet_ncnn_test.cpp)
+target_compile_features(rvf-spynet-test PRIVATE cxx_std_20)
+target_compile_options(rvf-spynet-test PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-spynet-test PRIVATE ncnn)
