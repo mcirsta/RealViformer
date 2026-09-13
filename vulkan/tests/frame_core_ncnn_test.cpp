@@ -1,6 +1,7 @@
 #include <net.h>
 
 #include "attention_mask_descriptor.hpp"
+#include "gelu.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -39,7 +40,10 @@ ncnn::Mat load_mat(const fs::path& path, int width, int height, int channels)
     const std::size_t count = static_cast<std::size_t>(width) * height * channels;
     const std::vector<float> values = read_floats(path, count);
     ncnn::Mat result(width, height, channels, sizeof(float), 1);
-    std::memcpy(result.data, values.data(), count * sizeof(float));
+    const std::size_t plane = static_cast<std::size_t>(width) * height;
+    for (int channel = 0; channel < channels; ++channel)
+        std::memcpy(static_cast<float*>(result.channel(channel)),
+                    values.data() + channel * plane, plane * sizeof(float));
     return result;
 }
 
@@ -54,16 +58,20 @@ ErrorMetrics compare(const ncnn::Mat& actual, const std::vector<float>& expected
 {
     if (actual.elempack != 1 || actual.elemsize != sizeof(float))
         throw std::runtime_error("test output is not unpacked FP32");
-    if (actual.total() != expected.size())
+    if (static_cast<std::size_t>(actual.w) * actual.h * actual.c != expected.size())
         throw std::runtime_error("test output element count does not match fixture");
 
-    const float* values = static_cast<const float*>(actual.data);
     double sum = 0.0;
     double squared_sum = 0.0;
     double maximum = 0.0;
     for (std::size_t index = 0; index < expected.size(); ++index)
     {
-        const double error = std::abs(static_cast<double>(values[index]) - expected[index]);
+        const std::size_t plane = static_cast<std::size_t>(actual.w) * actual.h;
+        const float* channel = actual.channel(static_cast<int>(index / plane));
+        const float value = channel[index % plane];
+        if (!std::isfinite(value) || !std::isfinite(expected[index]))
+            throw std::runtime_error("nonfinite frame core output");
+        const double error = std::abs(static_cast<double>(value) - expected[index]);
         maximum = std::max(maximum, error);
         sum += error;
         squared_sum += error * error;
@@ -121,11 +129,13 @@ int main(int argc, char** argv)
         network.register_custom_layer(
             "archs.realviformer_arch.AttentionMaskDescriptor",
             rvf::create_attention_mask_descriptor_layer);
+        network.register_custom_layer("GELU", rvf::create_gelu_layer);
         network.opt.use_vulkan_compute = use_vulkan;
         network.opt.use_packing_layout = false;
         network.opt.use_fp16_packed = false;
         network.opt.use_fp16_storage = false;
         network.opt.use_fp16_arithmetic = false;
+        network.opt.use_fp16_uniform = false;
         network.opt.use_bf16_storage = false;
         network.opt.use_winograd_convolution = false;
         network.opt.use_winograd23_convolution = false;
@@ -172,7 +182,7 @@ int main(int argc, char** argv)
         print_metrics("out1", state_error);
 
         const double maximum_error = std::max(output_error.maximum, state_error.maximum);
-        const double tolerance = use_vulkan ? 3e-3 : 2e-4;
+        const double tolerance = 2e-4;
         if (maximum_error > tolerance)
         {
             std::cerr << "FAIL: maximum error exceeds " << tolerance << '\n';

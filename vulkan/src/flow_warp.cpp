@@ -101,6 +101,8 @@ FlowWarpLayer::FlowWarpLayer(FlowWarpPadding padding) : padding_(padding)
     support_bf16_storage = false;
 }
 
+FlowWarpLayer::~FlowWarpLayer() { delete pipeline_; }
+
 int FlowWarpLayer::create_pipeline(const ncnn::Option& opt)
 {
     if (!opt.use_vulkan_compute)
@@ -196,7 +198,8 @@ int FlowWarpLayer::forward(
     const ncnn::VkMat& feature = bottom_blobs[0];
     const ncnn::VkMat& flow = bottom_blobs[1];
     if (feature.dims != 3 || flow.dims != 3 || feature.elempack != 1
-        || flow.elempack != 1 || flow.c != 2 || feature.w != flow.w
+        || flow.elempack != 1 || feature.elemsize != sizeof(float)
+        || flow.elemsize != sizeof(float) || flow.c != 2 || feature.w != flow.w
         || feature.h != flow.h)
         return -1;
 

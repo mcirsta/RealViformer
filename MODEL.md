@@ -37,10 +37,26 @@ pretrained_model/ncnn/frame_core.bin
 - Contents: one x4 recurrent frame pass after optical-flow alignment
 - Precision: FP32 parameters and FP32 arithmetic
 
-The graph uses ncnn's Vulkan SDPA implementation and a portable custom Vulkan
-operator for the learned attention-mask descriptor. SPyNet optical flow and
-feature warping will be added as separate graphs and kernels. No artifact in
-this repository requires a Google Drive download.
+The graph uses ncnn's Vulkan SDPA implementation and portable custom Vulkan
+operators for the learned attention-mask descriptor and erf-form GELU. The
+GELU override is required because the pinned ncnn Vulkan operator uses the tanh
+approximation. The checkpoint and graph weights are unchanged.
+
+The six learned SPyNet refinement stages are bundled separately:
+
+```text
+pretrained_model/ncnn/spynet.param
+pretrained_model/ncnn/spynet.bin
+```
+
+- Parameter SHA-256: `f7000033e8980b8f56e1473ccb71871d2521ce58910666a85337ece1f721fe53`
+- Weight SHA-256: `9245abc02c8a5b1bd826c0556cbc5acd501fdf013eb51bcdd095af3c1a4eba42`
+- Weight size: 5,761,320 bytes
+- Contents: 30 FP32 convolutions extracted from the same checkpoint
+
+`rvf::SpyNet` supplies the full pyramid and flow-warp orchestration around these
+stages. `vulkan/tools/export_ncnn_spynet.py` reproduces the graph using the pinned
+PNNX exporter. No artifact requires a Google Drive download.
 
 The upstream project contains an MIT license but does not state a separate
 license specifically for the checkpoint. This fork does not assert additional

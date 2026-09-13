@@ -50,6 +50,7 @@ add_executable(
     rvf-frame-core-test
     tests/frame_core_ncnn_test.cpp
     src/attention_mask_descriptor.cpp
+    src/gelu.cpp
 )
 target_include_directories(rvf-frame-core-test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(rvf-frame-core-test PRIVATE cxx_std_20)
@@ -70,3 +71,29 @@ add_executable(rvf-spynet-test tests/spynet_ncnn_test.cpp)
 target_compile_features(rvf-spynet-test PRIVATE cxx_std_20)
 target_compile_options(rvf-spynet-test PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(rvf-spynet-test PRIVATE ncnn)
+
+add_library(rvf-optical-flow STATIC src/spynet.cpp src/flow_warp.cpp)
+target_include_directories(rvf-optical-flow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_compile_features(rvf-optical-flow PUBLIC cxx_std_20)
+target_compile_options(rvf-optical-flow PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-optical-flow PUBLIC ncnn)
+
+add_executable(rvf-spynet-flow-test tests/spynet_flow_test.cpp)
+target_compile_options(rvf-spynet-flow-test PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-spynet-flow-test PRIVATE rvf-optical-flow)
+
+add_library(rvf-restoration STATIC src/recurrent_restorer.cpp src/attention_mask_descriptor.cpp src/gelu.cpp)
+target_include_directories(rvf-restoration PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_compile_features(rvf-restoration PUBLIC cxx_std_20)
+target_compile_options(rvf-restoration PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-restoration PUBLIC rvf-optical-flow)
+
+add_executable(rvf-sequence-test tests/sequence_test.cpp)
+target_compile_options(rvf-sequence-test PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-sequence-test PRIVATE rvf-restoration)
+
+add_executable(rvf-gelu-test tests/gelu_test.cpp src/gelu.cpp)
+target_include_directories(rvf-gelu-test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_compile_features(rvf-gelu-test PRIVATE cxx_std_20)
+target_compile_options(rvf-gelu-test PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-gelu-test PRIVATE ncnn)

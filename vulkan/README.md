@@ -5,7 +5,7 @@ uses Vulkan 1.1 compute and SPIR-V without AMD- or NVIDIA-specific APIs.
 Optional paths may use features such as FP16 arithmetic only after runtime
 capability detection.
 
-The first milestone provides:
+Implemented and validated:
 
 - compute-device enumeration and selection;
 - `VK_EXT_memory_budget` live VRAM accounting;
@@ -17,17 +17,24 @@ The first milestone provides:
 - native Vulkan scaled-dot-product attention and mask-descriptor execution.
 - portable Vulkan bilinear flow warping with zero and border padding;
 - a dynamic ncnn graph containing all six learned SPyNet refinement stages.
+- the complete SPyNet pyramid, normalization, flow resizing, and refinement loop;
+- streaming recurrent restoration with GPU-resident previous-frame features;
+- the erf-form GELU required to match the original PyTorch model;
+- sequence reset and multi-frame image/state parity tests.
 
-The frame core, learned SPyNet stages, and feature-warp primitive run on Vulkan
-now. Integrating the SPyNet pyramid scheduler, tiled x4 reconstruction, video
-I/O, and the hard dynamic-memory enforcement path remain under development.
-The PyTorch path is the correctness reference.
+Complete recurrent restoration runs on Vulkan for bounded test inputs. The
+SPyNet flow path has also been validated at 640x480. Full-resolution restoration
+on small GPUs still needs tiled x4 reconstruction and enforcement of the live
+memory ceiling. Video I/O and RAM spill remain under development. The current
+sequence test deliberately limits inputs to 128x128 until those memory controls
+are connected; the device probe's ceiling is not yet enforced by ncnn inference.
+The PyTorch path remains the correctness reference.
 
 ## Build
 
 ```sh
 cmake -S vulkan -B build/vulkan -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build/vulkan
+cmake --build build/vulkan -j 2
 ```
 
 The default build uses the exact ncnn revision pinned in the Git submodule.
@@ -68,6 +75,20 @@ Validate the flow-warp primitive on CPU and Vulkan:
 ./build/vulkan/rvf-flow-warp-test --vulkan
 ```
 
+Validate the erf and tanh GELU paths against a double-precision reference:
+
+```sh
+./build/vulkan/rvf-gelu-test
+./build/vulkan/rvf-gelu-test --vulkan
+```
+
+The pinned ncnn revision's Vulkan GELU always uses a tanh approximation, even
+when the exported graph requests the erf form. `rvf::GeluLayer` overrides it
+without modifying ncnn. The erf approximation has roughly 1.5e-7 absolute error;
+the operator test sweeps negative and positive tails and uses a 2e-6 GELU
+tolerance. This matters for recurrence: the old approximation produced growing
+image/state differences over successive frames.
+
 Validate the six learned SPyNet stages:
 
 ```sh
@@ -85,6 +106,67 @@ python vulkan/tools/export_spynet_modules.py \
     pretrained_model/ncnn/spynet.bin \
     /tmp/realviformer-spynet-fixture --vulkan
 ```
+
+Validate complete optical flow (odd dimensions exercise border replication):
+
+```sh
+python vulkan/tools/make_flow_fixture.py pretrained_model/weights.pth \
+    build/fixtures/flow-95x79 --width 95 --height 79
+./build/vulkan/rvf-spynet-flow-test pretrained_model/ncnn/spynet.param \
+    pretrained_model/ncnn/spynet.bin build/fixtures/flow-95x79
+./build/vulkan/rvf-spynet-flow-test pretrained_model/ncnn/spynet.param \
+    pretrained_model/ncnn/spynet.bin build/fixtures/flow-95x79 --vulkan
+```
+
+Also test 32x32 (the upstream five-level special case), and a 640x480 video pair:
+
+```sh
+python vulkan/tools/make_flow_fixture.py pretrained_model/weights.pth \
+    build/fixtures/flow-video --width 640 --height 480 \
+    --video /path/to/source.avi --start-frame 120
+./build/vulkan/rvf-spynet-flow-test pretrained_model/ncnn/spynet.param \
+    pretrained_model/ncnn/spynet.bin build/fixtures/flow-video --vulkan
+```
+
+Validate consecutive restored frames and recurrent states against the complete
+PyTorch model, including a reset to a new sequence:
+
+```sh
+python vulkan/tools/make_sequence_fixture.py pretrained_model/weights.pth \
+    build/fixtures/sequence --width 128 --height 96 --frames 4 \
+    --video /path/to/source.avi --start-frame 120
+./build/vulkan/rvf-sequence-test pretrained_model/ncnn build/fixtures/sequence
+./build/vulkan/rvf-sequence-test pretrained_model/ncnn build/fixtures/sequence \
+    --vulkan --device 0
+```
+
+Omit `--video` for deterministic translated synthetic frames. Fixture generation
+uses PyTorch on two CPU threads by default; the native tests do not need Python
+once fixtures exist. `--save DIRECTORY` on the sequence test writes planar FP32
+x4 outputs for inspection. Both tests support `--device INDEX` for another GPU.
+Image/state tolerances are 1e-4 / 2e-4. All comparisons reject nonfinite values.
+
+On the RX 550 (RADV POLARIS12), a four-frame 128x96 video test produced maximum
+image error of 2.8e-6 and state error of 5.2e-5. Frames took about 0.50--0.73 s
+including transfers and test-only state readback. The 640x480 flow-only test took
+about 1.2--1.3 s with maximum error 3.5e-5 pixels. These are correctness measurements
+while a separate CPU render was active, not full-resolution movie benchmarks.
+
+### Native API
+
+`rvf::SpyNet` records the whole optical-flow pipeline into an ncnn `VkCompute`
+command buffer, with no CPU readback between pyramid levels. `rvf::RecurrentRestorer`
+loads the bundled graphs once and accepts planar FP32 RGB frames through
+`process()`, retaining the previous RGB frame and 48-channel state on the GPU.
+It downloads only the x4 RGB output unless state readback is explicitly requested.
+`reset()` starts a new sequence; dimensions cannot change without a reset. Inputs
+must be divisible by four. The upstream short-wide SPyNet limitation is reported
+as an error (width > 32 with height <= 32).
+
+The caller owns the ncnn GPU instance and must keep it alive until all restorers
+are destroyed. Each restorer owns its allocators and must be used serially.
+There is currently no automatic tile scheduler or RAM fallback in this API;
+callers must keep test sizes bounded until memory-budget enforcement is complete.
 
 The ncnn graph is exported with PNNX while preserving
 `archs.realviformer_arch.AttentionMaskDescriptor` as a module operator. This

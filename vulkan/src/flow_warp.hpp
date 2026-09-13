@@ -14,6 +14,7 @@ class FlowWarpLayer final : public ncnn::Layer
 {
 public:
     explicit FlowWarpLayer(FlowWarpPadding padding);
+    ~FlowWarpLayer() override;
 
     int create_pipeline(const ncnn::Option& opt) override;
     int destroy_pipeline(const ncnn::Option& opt) override;
