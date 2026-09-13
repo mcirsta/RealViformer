@@ -96,7 +96,7 @@ template <class Tensor> void validate_rgb_pair(const Tensor &reference, const Te
 {
     auto valid = [](const Tensor &tensor)
     {
-        return !tensor.empty() && tensor.dims == 3 && tensor.c == 3 && tensor.elempack == 1 &&
+        return !tensor.empty() && tensor.n == 1 && tensor.dims == 3 && tensor.c == 3 && tensor.elempack == 1 &&
                tensor.elemsize == sizeof(float) && tensor.w > 0 && tensor.h > 0 &&
                tensor.w <= 16384 && tensor.h <= 16384;
     };

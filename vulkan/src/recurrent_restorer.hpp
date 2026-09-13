@@ -11,6 +11,8 @@ namespace rvf
 // Streaming, untiled FP32 reference backend. Keeps only the previous RGB frame
 // and 48-channel feature state between calls; reset() marks a scene boundary.
 // The caller must keep the ncnn GPU instance alive for a Vulkan restorer.
+// Vulkan inputs are capped at 128x128 until tiled reconstruction and actual
+// allocator-budget enforcement are implemented. This is not a VRAM guarantee.
 class RecurrentRestorer final
 {
   public:

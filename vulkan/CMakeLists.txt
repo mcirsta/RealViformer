@@ -33,6 +33,7 @@ target_link_libraries(rvf-vulkan PRIVATE Vulkan::Vulkan)
 
 if(RVF_USE_SYSTEM_NCNN)
     find_package(ncnn CONFIG REQUIRED)
+    message(WARNING "System ncnn bypasses the validated subgroup/buffer compatibility patches; run Vulkan validation before use")
 else()
     set(NCNN_VULKAN ON CACHE BOOL "" FORCE)
     set(NCNN_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
@@ -44,6 +45,7 @@ else()
         "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/ncnn"
         "${CMAKE_CURRENT_BINARY_DIR}/ncnn"
     )
+    include(cmake/ncnn_compat.cmake)
 endif()
 
 add_executable(
@@ -51,6 +53,7 @@ add_executable(
     tests/frame_core_ncnn_test.cpp
     src/attention_mask_descriptor.cpp
     src/gelu.cpp
+    src/last_axis_reduction.cpp
 )
 target_include_directories(rvf-frame-core-test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(rvf-frame-core-test PRIVATE cxx_std_20)
@@ -82,7 +85,7 @@ add_executable(rvf-spynet-flow-test tests/spynet_flow_test.cpp)
 target_compile_options(rvf-spynet-flow-test PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(rvf-spynet-flow-test PRIVATE rvf-optical-flow)
 
-add_library(rvf-restoration STATIC src/recurrent_restorer.cpp src/attention_mask_descriptor.cpp src/gelu.cpp)
+add_library(rvf-restoration STATIC src/recurrent_restorer.cpp src/attention_mask_descriptor.cpp src/gelu.cpp src/last_axis_reduction.cpp)
 target_include_directories(rvf-restoration PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(rvf-restoration PUBLIC cxx_std_20)
 target_compile_options(rvf-restoration PRIVATE -Wall -Wextra -Wpedantic)
@@ -97,3 +100,14 @@ target_include_directories(rvf-gelu-test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/sr
 target_compile_features(rvf-gelu-test PRIVATE cxx_std_20)
 target_compile_options(rvf-gelu-test PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(rvf-gelu-test PRIVATE ncnn)
+
+add_executable(rvf-reduction-test tests/reduction_test.cpp src/last_axis_reduction.cpp)
+target_include_directories(rvf-reduction-test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_compile_features(rvf-reduction-test PRIVATE cxx_std_20)
+target_compile_options(rvf-reduction-test PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(rvf-reduction-test PRIVATE ncnn)
+
+enable_testing()
+add_test(NAME rvf-gelu-cpu COMMAND rvf-gelu-test)
+add_test(NAME rvf-flow-warp-cpu COMMAND rvf-flow-warp-test)
+add_test(NAME rvf-reduction-cpu COMMAND rvf-reduction-test)

@@ -2,6 +2,7 @@
 
 #include "attention_mask_descriptor.hpp"
 #include "gelu.hpp"
+#include "last_axis_reduction.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -130,6 +131,7 @@ int main(int argc, char** argv)
             "archs.realviformer_arch.AttentionMaskDescriptor",
             rvf::create_attention_mask_descriptor_layer);
         network.register_custom_layer("GELU", rvf::create_gelu_layer);
+        network.register_custom_layer("Reduction", rvf::create_last_axis_reduction_layer);
         network.opt.use_vulkan_compute = use_vulkan;
         network.opt.use_packing_layout = false;
         network.opt.use_fp16_packed = false;

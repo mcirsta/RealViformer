@@ -96,6 +96,8 @@ int main(int argc, char** argv)
         network.opt.use_fp16_packed = false;
         network.opt.use_fp16_storage = false;
         network.opt.use_fp16_arithmetic = false;
+        network.opt.use_fp16_uniform = false;
+        network.opt.use_bf16_packed = false;
         network.opt.use_bf16_storage = false;
         network.opt.use_winograd_convolution = false;
         network.opt.num_threads = 1;
@@ -156,6 +158,9 @@ int main(int argc, char** argv)
                         (static_cast<std::size_t>(channel) * height + row) * width;
                     for (int column = 0; column < width; ++column)
                     {
+                        if (!std::isfinite(actual[column]) ||
+                            !std::isfinite(expected[offset + column]))
+                            throw std::runtime_error(name + " contains a nonfinite value");
                         level_error = std::max(
                             level_error,
                             std::abs(static_cast<double>(

@@ -6,6 +6,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -67,7 +70,10 @@ ncnn::Mat make_flow(int width, int height)
 double maximum_error(const ncnn::Mat& left, const ncnn::Mat& right)
 {
     if (left.w != right.w || left.h != right.h || left.c != right.c)
-        throw std::runtime_error("output shape mismatch");
+        throw std::runtime_error("output shape mismatch: expected " + std::to_string(left.w) + "x" +
+            std::to_string(left.h) + "x" + std::to_string(left.c) + ", got " +
+            std::to_string(right.w) + "x" + std::to_string(right.h) + "x" +
+            std::to_string(right.c) + " pack" + std::to_string(right.elempack));
     double maximum = 0.0;
     for (int channel = 0; channel < left.c; ++channel)
     {
@@ -76,7 +82,11 @@ double maximum_error(const ncnn::Mat& left, const ncnn::Mat& right)
             const float* a = left.channel(channel).row(y);
             const float* b = right.channel(channel).row(y);
             for (int x = 0; x < left.w; ++x)
+            {
+                if (!std::isfinite(a[x]) || !std::isfinite(b[x]))
+                    throw std::runtime_error("nonfinite warp result");
                 maximum = std::max(maximum, std::abs(static_cast<double>(a[x] - b[x])));
+            }
         }
     }
     return maximum;
@@ -91,10 +101,13 @@ ncnn::Mat run(
     rvf::FlowWarpLayer layer(padding);
     ncnn::Option option;
     option.num_threads = 1;
+    option.use_packing_layout = false;
     option.use_vulkan_compute = use_vulkan;
     option.use_fp16_packed = false;
     option.use_fp16_storage = false;
     option.use_fp16_arithmetic = false;
+    option.use_fp16_uniform = false;
+    option.use_bf16_packed = false;
     option.use_bf16_storage = false;
 
     if (!use_vulkan)
@@ -122,8 +135,9 @@ ncnn::Mat run(
         ncnn::VkCompute command(device);
         ncnn::VkMat feature_gpu;
         ncnn::VkMat flow_gpu;
-        command.record_upload(feature, feature_gpu, option);
-        command.record_upload(flow, flow_gpu, option);
+        // Keep pack1 even when the fixture has four channels.
+        command.record_clone(feature, feature_gpu, option);
+        command.record_clone(flow, flow_gpu, option);
         std::vector<ncnn::VkMat> outputs(1);
         if (layer.forward({feature_gpu, flow_gpu}, outputs, command, option) != 0)
             throw std::runtime_error("Vulkan flow warp failed");
@@ -141,23 +155,41 @@ ncnn::Mat run(
 
 int main(int argc, char** argv)
 {
-    if (argc > 2 || (argc == 2 && std::string(argv[1]) != "--vulkan"))
+    if (argc > 3)
     {
-        std::cerr << "usage: " << argv[0] << " [--vulkan]\n";
+        std::cerr << "usage: " << argv[0] << " [--vulkan] [FIXTURE_ROOT]\n";
         return 2;
     }
 
     try
     {
-        const bool use_vulkan = argc == 2;
+        bool use_vulkan = false;
+        std::filesystem::path fixture_root;
+        for (int i = 1; i < argc; ++i)
+            if (std::string(argv[i]) == "--vulkan")
+                use_vulkan = true;
+            else if (fixture_root.empty())
+                fixture_root = argv[i];
+            else
+                throw std::invalid_argument("unexpected argument");
         GpuInstance gpu_instance(use_vulkan);
         const ncnn::Mat feature = make_feature(19, 13, 5);
         const ncnn::Mat flow = make_flow(feature.w, feature.h);
+
+        // Independent analytical checks also run without external fixtures.
+        const ncnn::Mat singleton = make_feature(1, 1, 4);
+        ncnn::Mat singleton_flow(1, 1, 2, sizeof(float), 1);
+        singleton_flow.fill(1e30f);
+        ncnn::Mat identity_flow(feature.w, feature.h, 2, sizeof(float), 1);
+        identity_flow.fill(0.f);
 
         for (const rvf::FlowWarpPadding padding : {
                  rvf::FlowWarpPadding::Zeros,
                  rvf::FlowWarpPadding::Border})
         {
+            if (maximum_error(singleton, run(singleton, singleton_flow, padding, use_vulkan)) > 1e-7 ||
+                maximum_error(feature, run(feature, identity_flow, padding, use_vulkan)) > 3e-6)
+                throw std::runtime_error("analytical singleton/identity warp check failed");
             const ncnn::Mat reference = run(feature, flow, padding, false);
             const ncnn::Mat actual = run(feature, flow, padding, use_vulkan);
             const double error = maximum_error(reference, actual);
@@ -168,6 +200,58 @@ int main(int argc, char** argv)
                 throw std::runtime_error("flow-warp error exceeds tolerance");
         }
         std::cout << "PASS: bilinear flow warp agrees with the scalar reference\n";
+        if (!fixture_root.empty())
+        {
+            int cases = 0;
+            for (const auto &entry : std::filesystem::directory_iterator(fixture_root))
+            {
+                if (!entry.is_directory())
+                    continue;
+                int width = 0, height = 0, channels = 0;
+                std::ifstream shape(entry.path() / "shape.txt");
+                if (!(shape >> width >> height >> channels) || width < 1 || height < 1 ||
+                    width > 640 || height > 480 || channels < 1 || channels > 48)
+                    throw std::runtime_error("invalid warp fixture shape");
+                auto load = [&](const std::string &name, int ch)
+                {
+                    std::ifstream file(entry.path() / (name + ".f32"), std::ios::binary | std::ios::ate);
+                    const std::streamoff bytes = std::streamoff(width) * height * sizeof(float);
+                    if (!file || file.tellg() != bytes * ch)
+                        throw std::runtime_error("invalid warp fixture size");
+                    file.seekg(0);
+                    ncnn::Mat tensor(width, height, ch, sizeof(float), 1);
+                    for (int c = 0; c < ch; ++c)
+                        file.read(reinterpret_cast<char *>(static_cast<float *>(tensor.channel(c))), bytes);
+                    if (!file)
+                        throw std::runtime_error("could not read warp fixture");
+                    return tensor;
+                };
+                for (const auto padding : {rvf::FlowWarpPadding::Zeros, rvf::FlowWarpPadding::Border})
+                {
+                    const std::string name = padding == rvf::FlowWarpPadding::Zeros ? "zeros" : "border";
+                    const ncnn::Mat actual = run(load("feature", channels), load("flow", 2), padding, use_vulkan);
+                    if (const char *dump = std::getenv("RVF_WARP_TEST_DUMP"))
+                    {
+                        const auto directory = std::filesystem::path(dump) / entry.path().filename();
+                        std::filesystem::create_directories(directory);
+                        std::ofstream file(directory / (name + ".f32"), std::ios::binary);
+                        for (int c = 0; c < channels; ++c)
+                            file.write(reinterpret_cast<const char *>(static_cast<const float *>(actual.channel(c))),
+                                       std::streamsize(width) * height * sizeof(float));
+                        if (!file)
+                            throw std::runtime_error("could not write warp diagnostic");
+                    }
+                    const double error = maximum_error(load(name, channels), actual);
+                    std::cout << entry.path().filename() << ' ' << name << ": PyTorch max=" << error << '\n';
+                    if (error > 3e-6)
+                        throw std::runtime_error("warp differs from PyTorch by more than 3e-6");
+                }
+                ++cases;
+            }
+            if (cases != 6)
+                throw std::runtime_error("expected six independent warp fixtures");
+            std::cout << "PASS: all six warp cases agree with PyTorch\n";
+        }
         return 0;
     }
     catch (const std::exception& error)

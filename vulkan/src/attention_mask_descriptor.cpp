@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 namespace rvf {
@@ -132,6 +133,12 @@ AttentionMaskDescriptorLayer::AttentionMaskDescriptorLayer()
     support_bf16_storage = false;
 }
 
+AttentionMaskDescriptorLayer::~AttentionMaskDescriptorLayer()
+{
+    delete dot_pipeline_;
+    delete reduce_pipeline_;
+}
+
 int AttentionMaskDescriptorLayer::create_pipeline(const ncnn::Option& opt)
 {
     if (!opt.use_vulkan_compute)
@@ -176,7 +183,10 @@ int AttentionMaskDescriptorLayer::forward(
     const ncnn::Mat& k = bottom_blobs[0];
     const ncnn::Mat& q = bottom_blobs[1];
     if (q.dims != 3 || k.dims != 3 || q.elempack != 1 || k.elempack != 1
-        || q.w != k.w || q.h != k.h || q.c != k.c)
+        || q.elemsize != sizeof(float) || k.elemsize != sizeof(float)
+        || q.n != 1 || k.n != 1 || q.h > 255 || q.c > 65535
+        || q.total() > size_t(std::numeric_limits<int>::max())
+        || q.empty() || k.empty() || q.w != k.w || q.h != k.h || q.c != k.c)
         return -1;
 
     ncnn::Mat& output = top_blobs[0];
@@ -220,7 +230,10 @@ int AttentionMaskDescriptorLayer::forward(
     const ncnn::VkMat& k = bottom_blobs[0];
     const ncnn::VkMat& q = bottom_blobs[1];
     if (q.dims != 3 || k.dims != 3 || q.elempack != 1 || k.elempack != 1
-        || q.w != k.w || q.h != k.h || q.c != k.c)
+        || q.elemsize != sizeof(float) || k.elemsize != sizeof(float)
+        || q.n != 1 || k.n != 1 || q.h > 255 || q.c > 65535
+        || q.total() > size_t(std::numeric_limits<int>::max())
+        || q.empty() || k.empty() || q.w != k.w || q.h != k.h || q.c != k.c)
         return -1;
 
     ncnn::VkMat logits(q.h, q.h, q.c, sizeof(float), 1, opt.workspace_vkallocator);

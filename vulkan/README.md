@@ -21,13 +21,16 @@ Implemented and validated:
 - streaming recurrent restoration with GPU-resident previous-frame features;
 - the erf-form GELU required to match the original PyTorch model;
 - sequence reset and multi-frame image/state parity tests.
+- bounded-dispatch sum/mean reductions, including >65,535 output elements;
+- core and synchronization validation with explicit failure on API errors.
 
 Complete recurrent restoration runs on Vulkan for bounded test inputs. The
 SPyNet flow path has also been validated at 640x480. Full-resolution restoration
 on small GPUs still needs tiled x4 reconstruction and enforcement of the live
 memory ceiling. Video I/O and RAM spill remain under development. The current
-sequence test deliberately limits inputs to 128x128 until those memory controls
-are connected; the device probe's ceiling is not yet enforced by ncnn inference.
+sequence test and native Vulkan restoration API deliberately limit inputs to
+128x128 until those memory controls are connected; this size guard is not a
+VRAM guarantee. The device probe's ceiling is not yet enforced by ncnn inference.
 The PyTorch path remains the correctness reference.
 
 ## Build
@@ -35,9 +38,15 @@ The PyTorch path remains the correctness reference.
 ```sh
 cmake -S vulkan -B build/vulkan -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build/vulkan -j 2
+ctest --test-dir build/vulkan --output-on-failure
 ```
 
 The default build uses the exact ncnn revision pinned in the Git submodule.
+It compiles narrowly patched build-directory copies of three ncnn source files
+to fix subgroup-stage validation, constant-buffer copy usage, and pooled-buffer
+synchronization. The submodule stays clean; configure fails if the patch anchors
+change. `RVF_USE_SYSTEM_NCNN` bypasses these compatibility fixes and requires
+independent validation of the installed ncnn version.
 Clone this repository with `--recurse-submodules`, or run:
 
 ```sh
@@ -74,6 +83,32 @@ Validate the flow-warp primitive on CPU and Vulkan:
 ./build/vulkan/rvf-flow-warp-test
 ./build/vulkan/rvf-flow-warp-test --vulkan
 ```
+
+Independent PyTorch warp references cover borders, extreme finite motion,
+one-pixel axes, odd channel padding, and 640x480 coordinates:
+
+```sh
+python vulkan/tools/make_warp_fixtures.py build/fixtures/warp
+./build/vulkan/rvf-flow-warp-test build/fixtures/warp
+./build/vulkan/rvf-flow-warp-test --vulkan build/fixtures/warp
+./build/vulkan/rvf-reduction-test
+./build/vulkan/rvf-reduction-test --vulkan
+```
+
+Run native GPU tests through the validation wrapper (requires the installed
+Khronos validation layer). It enables core and synchronization checks and fails
+on validation errors even if the native numerical test exits zero:
+
+```sh
+python vulkan/tools/validate_vulkan.py --log build/validation.log -- \
+    ./build/vulkan/rvf-sequence-test pretrained_model/ncnn \
+    build/fixtures/sequence --vulkan
+```
+
+`VK_LAYER_SYNCVAL_SHADER_ACCESSES_HEURISTIC=1` additionally enables static shader
+access checks on validation-layer versions that support it; those checks can
+produce false positives. `RVF_WARP_TEST_DUMP=DIRECTORY` saves warp-test outputs
+for numerical diagnosis.
 
 Validate the erf and tanh GELU paths against a double-precision reference:
 
@@ -145,6 +180,10 @@ uses PyTorch on two CPU threads by default; the native tests do not need Python
 once fixtures exist. `--save DIRECTORY` on the sequence test writes planar FP32
 x4 outputs for inspection. Both tests support `--device INDEX` for another GPU.
 Image/state tolerances are 1e-4 / 2e-4. All comparisons reject nonfinite values.
+These are strict diagnostic thresholds, not a claim of bitwise equivalence:
+the 16-frame 108x76 video test currently exceeds the state threshold near its
+end despite image differences below 5e-6. This remains an open regression;
+the tolerance has not been loosened. See [the audit](AUDIT.md) for details.
 
 On the RX 550 (RADV POLARIS12), a four-frame 128x96 video test produced maximum
 image error of 2.8e-6 and state error of 5.2e-5. Frames took about 0.50--0.73 s
@@ -166,7 +205,9 @@ as an error (width > 32 with height <= 32).
 The caller owns the ncnn GPU instance and must keep it alive until all restorers
 are destroyed. Each restorer owns its allocators and must be used serially.
 There is currently no automatic tile scheduler or RAM fallback in this API;
-callers must keep test sizes bounded until memory-budget enforcement is complete.
+the Vulkan API rejects dimensions above 128 until memory-budget enforcement is
+complete. Invalid/nonfinite inputs are rejected and failed readbacks do not
+advance the stored frame/state.
 
 The ncnn graph is exported with PNNX while preserving
 `archs.realviformer_arch.AttentionMaskDescriptor` as a module operator. This

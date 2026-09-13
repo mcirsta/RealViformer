@@ -8,6 +8,7 @@ class AttentionMaskDescriptorLayer final : public ncnn::Layer
 {
 public:
     AttentionMaskDescriptorLayer();
+    ~AttentionMaskDescriptorLayer() override;
 
     int create_pipeline(const ncnn::Option& opt) override;
     int destroy_pipeline(const ncnn::Option& opt) override;

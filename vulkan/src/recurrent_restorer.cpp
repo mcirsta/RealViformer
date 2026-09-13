@@ -2,12 +2,14 @@
 #include "attention_mask_descriptor.hpp"
 #include "flow_warp.hpp"
 #include "gelu.hpp"
+#include "last_axis_reduction.hpp"
 #include "spynet.hpp"
 
 #include <allocator.h>
 #include <gpu.h>
 #include <net.h>
 
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -21,6 +23,22 @@ void check(int result, const char *operation)
     if (result != 0)
         throw std::runtime_error(std::string(operation) + " failed (" + std::to_string(result) +
                                  ")");
+}
+
+bool finite_tensor(const ncnn::Mat &tensor)
+{
+    for (int ch = 0; ch < tensor.c; ++ch)
+        for (int y = 0; y < tensor.h; ++y)
+            for (int x = 0; x < tensor.w; ++x)
+                if (!std::isfinite(tensor.channel(ch).row(y)[x])) return false;
+    return true;
+}
+
+bool shape_is(const ncnn::Mat &tensor, int width, int height, int channels)
+{
+    return !tensor.empty() && tensor.n == 1 && tensor.dims == 3 && tensor.elempack == 1 &&
+           tensor.elemsize == sizeof(float) && tensor.w == width && tensor.h == height &&
+           tensor.c == channels;
 }
 } // namespace
 
@@ -50,6 +68,7 @@ class RecurrentRestorer::Impl
         core.register_custom_layer("archs.realviformer_arch.AttentionMaskDescriptor",
                                    create_attention_mask_descriptor_layer);
         core.register_custom_layer("GELU", create_gelu_layer);
+        core.register_custom_layer("Reduction", create_last_axis_reduction_layer);
         if (vulkan)
         {
             core.set_vulkan_device(flow.device());
@@ -75,16 +94,23 @@ class RecurrentRestorer::Impl
 
     void validate(const ncnn::Mat &frame) const
     {
-        if (frame.empty() || frame.dims != 3 || frame.c != 3 || frame.elempack != 1 ||
+        if (frame.empty() || frame.n != 1 || frame.dims != 3 || frame.c != 3 || frame.elempack != 1 ||
             frame.elemsize != sizeof(float) || frame.w < 4 || frame.h < 4 || frame.w > 16384 ||
             frame.h > 16384 || frame.w % 4 || frame.h % 4)
             throw std::invalid_argument(
                 "restorer requires planar FP32 RGB with dimensions divisible by four");
+        // The probe's memory ceiling is not yet connected to ncnn allocations.
+        // Enforce the same conservative bound in the API as in the CLI test.
+        if (flow.device() && (frame.w > 128 || frame.h > 128))
+            throw std::invalid_argument("Vulkan restoration is limited to 128x128 until tiled "
+                                        "reconstruction and memory-budget enforcement are connected");
         if (frame.w > 32 && frame.h <= 32)
             throw std::invalid_argument("upstream SPyNet requires height > 32 when width > 32");
         if (width != 0 && (frame.w != width || frame.h != height))
             throw std::invalid_argument(
                 "frame dimensions changed; reset the recurrent state first");
+        if (!finite_tensor(frame))
+            throw std::invalid_argument("input frame contains a nonfinite value");
     }
 
     ncnn::Mat process_cpu(const ncnn::Mat &frame, ncnn::Mat *state_readback)
@@ -110,14 +136,23 @@ class RecurrentRestorer::Impl
         ncnn::Mat output, next_state;
         check(extractor.extract("out0", output), "frame reconstruction");
         check(extractor.extract("out1", next_state), "next recurrent state");
+        if (!shape_is(output, frame.w * 4, frame.h * 4, 3) ||
+            !shape_is(next_state, frame.w, frame.h, 48) || !finite_tensor(output) ||
+            !finite_tensor(next_state))
+            throw std::runtime_error("invalid CPU image or recurrent feature state");
         // Own the previous frame so callers can reuse their input buffer.
         ncnn::Mat owned_frame = frame.clone();
         if (owned_frame.empty())
             throw std::runtime_error("previous frame allocation failed");
+        ncnn::Mat readback;
+        if (state_readback)
+        {
+            readback = next_state.clone();
+            if (readback.empty()) throw std::runtime_error("state readback allocation failed");
+        }
         state_cpu = next_state;
         previous_cpu = owned_frame;
-        if (state_readback)
-            *state_readback = state_cpu.clone();
+        if (state_readback) *state_readback = readback;
         return output;
     }
 
@@ -160,13 +195,17 @@ class RecurrentRestorer::Impl
         if (next_state.empty() || next_state.c != 48 || next_state.w != frame.w ||
             next_state.h != frame.h || next_state.elempack != 1)
             throw std::runtime_error("invalid recurrent feature state");
-        ncnn::Mat output;
+        ncnn::Mat output, readback;
         command.record_download(output_gpu, output, opt);
         if (state_readback)
-            command.record_download(next_state, *state_readback, opt);
+            command.record_download(next_state, readback, opt);
         check(command.submit_and_wait(), "Vulkan frame submission");
+        if (!shape_is(output, frame.w * 4, frame.h * 4, 3) || !finite_tensor(output) ||
+            (state_readback && (!shape_is(readback, frame.w, frame.h, 48) || !finite_tensor(readback))))
+            throw std::runtime_error("invalid Vulkan image or state readback");
         previous_gpu = current;
         state_gpu = next_state;
+        if (state_readback) *state_readback = readback;
         return output;
     }
 };

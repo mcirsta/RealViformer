@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
 
@@ -108,6 +109,22 @@ int main(int argc, char **argv)
             fs::create_directories(save_directory);
         GpuInstance instance(vulkan);
         rvf::RecurrentRestorer restorer(argv[1], vulkan, device_index);
+        auto must_reject = [&](const ncnn::Mat &bad)
+        {
+            try { restorer.process(bad); }
+            catch (const std::invalid_argument &) { return; }
+            throw std::runtime_error("unsafe input was accepted");
+        };
+        ncnn::Mat bad(width, height, 3, sizeof(float), 1);
+        bad.fill(0.f);
+        bad.channel(0).row(0)[0] = std::numeric_limits<float>::quiet_NaN();
+        must_reject(bad);
+        if (vulkan)
+        {
+            ncnn::Mat oversized(132, 128, 3, sizeof(float), 1);
+            oversized.fill(0.f);
+            must_reject(oversized);
+        }
         double maximum_output = 0.0, maximum_state = 0.0;
         for (int index = 0; index < frames; ++index)
         {
@@ -131,6 +148,7 @@ int main(int argc, char **argv)
             // Callers may reuse or modify their input and state-readback buffers.
             input.fill(-7.f);
             state.fill(-9.f);
+            if (index == 1) must_reject(bad); // a rejected frame must not advance recurrence
         }
         // Reset must reproduce frame zero, independent of the prior sequence.
         restorer.reset();

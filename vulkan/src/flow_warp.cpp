@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 namespace rvf {
@@ -42,6 +43,31 @@ afp load_feature(int channel, int x, int y)
     return buffer_ld1(feature_data, channel * p.feature_cstep + y * p.width + x);
 }
 
+float coordinate_divide(float numerator, int denominator)
+{
+    // Correctly rounded FP32 division by a small positive integer using only
+    // portable 32-bit integer operations. Vulkan float division (and fma) may
+    // be approximate; a one-ULP quotient error moves the sampling coordinate.
+    uint bits = floatBitsToUint(numerator);
+    int exponent = int((bits >> 23) & 255u);
+    if (exponent == 0 || exponent == 255 || denominator == 1)
+        return numerator / float(denominator);
+    uint divisor = uint(denominator);
+    uint significand = (bits & 0x7fffffu) | 0x800000u;
+    int shift = findMSB(divisor);
+    if (significand < (divisor << (23 - shift))) ++shift;
+    if (exponent <= shift)
+        return numerator / float(denominator);
+    uint remainder = (significand % divisor) << shift;
+    uint quotient = ((significand / divisor) << shift) + remainder / divisor;
+    remainder %= divisor;
+    if (remainder * 2u > divisor || (remainder * 2u == divisor && (quotient & 1u) != 0u))
+        ++quotient;
+    if (quotient == 0x1000000u) { quotient >>= 1; --shift; }
+    return uintBitsToFloat((bits & 0x80000000u) | (uint(exponent - shift) << 23)
+                          | (quotient & 0x7fffffu));
+}
+
 void main()
 {
     const int x = int(gl_GlobalInvocationID.x);
@@ -51,8 +77,33 @@ void main()
         return;
 
     const int pixel = y * p.width + x;
-    const afp source_x = afp(x) + buffer_ld1(flow_data, pixel);
-    const afp source_y = afp(y) + buffer_ld1(flow_data, p.flow_cstep + pixel);
+    // Preserve the FP32 normalize/unnormalize round trip used by the trained
+    // PyTorch path. Algebraically cancelling it changes subpixel positions.
+    // precise does not propagate backwards across a function-call boundary.
+    precise float numerator_x = 2.0 * (float(x) + buffer_ld1(flow_data, pixel));
+    precise float numerator_y = 2.0 * (float(y) + buffer_ld1(flow_data, p.flow_cstep + pixel));
+    precise float gx = coordinate_divide(numerator_x, max(p.width - 1, 1)) - 1.0;
+    precise float gy = coordinate_divide(numerator_y, max(p.height - 1, 1)) - 1.0;
+    precise float source_x = ((gx + 1.0) / 2.0) * float(p.width - 1);
+    precise float source_y = ((gy + 1.0) / 2.0) * float(p.height - 1);
+    if (isnan(source_x) || isnan(source_y))
+    {
+        buffer_st1(output_data, channel * p.output_cstep + pixel, source_x + source_y);
+        return;
+    }
+    if (p.border_padding != 0)
+    {
+        source_x = clamp(source_x, 0.0, float(p.width - 1));
+        source_y = clamp(source_y, 0.0, float(p.height - 1));
+    }
+    else if (source_x <= -1.0 || source_x >= float(p.width)
+             || source_y <= -1.0 || source_y >= float(p.height))
+    {
+        // Reject outside coordinates before float-to-int conversion, including
+        // finite displacements too large to be represented by an integer.
+        buffer_st1(output_data, channel * p.output_cstep + pixel, afp(0.f));
+        return;
+    }
     const int x0 = int(floor(source_x));
     const int y0 = int(floor(source_y));
     const int x1 = x0 + 1;
@@ -140,7 +191,10 @@ int FlowWarpLayer::forward(
         return -1;
     const ncnn::Mat& feature = bottom_blobs[0];
     const ncnn::Mat& flow = bottom_blobs[1];
-    if (feature.dims != 3 || flow.dims != 3 || feature.elempack != 1
+    if (feature.empty() || flow.empty() || feature.n != 1 || flow.n != 1
+        || feature.w > 16384 || feature.h > 16384
+        || feature.c > 65535 || feature.total() > size_t(std::numeric_limits<int>::max())
+        || feature.dims != 3 || flow.dims != 3 || feature.elempack != 1
         || flow.elempack != 1 || feature.elemsize != sizeof(float)
         || flow.elemsize != sizeof(float) || flow.c != 2
         || feature.w != flow.w || feature.h != flow.h)
@@ -169,8 +223,26 @@ int FlowWarpLayer::forward(
         for (int x = 0; x < feature.w; ++x)
         {
             const int pixel = y * feature.w + x;
-            const float source_x = x + flow_x[pixel];
-            const float source_y = y + flow_y[pixel];
+            const float gx = (2.f * (x + flow_x[pixel])) / std::max(feature.w - 1, 1) - 1.f;
+            const float gy = (2.f * (y + flow_y[pixel])) / std::max(feature.h - 1, 1) - 1.f;
+            float source_x = ((gx + 1.f) / 2.f) * (feature.w - 1);
+            float source_y = ((gy + 1.f) / 2.f) * (feature.h - 1);
+            if (std::isnan(source_x) || std::isnan(source_y))
+            {
+                destination[x] = source_x + source_y;
+                continue;
+            }
+            if (padding_ == FlowWarpPadding::Border)
+            {
+                source_x = std::clamp(source_x, 0.f, float(feature.w - 1));
+                source_y = std::clamp(source_y, 0.f, float(feature.h - 1));
+            }
+            else if (source_x <= -1.f || source_x >= feature.w || source_y <= -1.f ||
+                     source_y >= feature.h)
+            {
+                destination[x] = 0.f;
+                continue;
+            }
             const int x0 = static_cast<int>(std::floor(source_x));
             const int y0 = static_cast<int>(std::floor(source_y));
             const float dx = source_x - x0;
@@ -197,7 +269,10 @@ int FlowWarpLayer::forward(
         return -1;
     const ncnn::VkMat& feature = bottom_blobs[0];
     const ncnn::VkMat& flow = bottom_blobs[1];
-    if (feature.dims != 3 || flow.dims != 3 || feature.elempack != 1
+    if (feature.empty() || flow.empty() || feature.n != 1 || flow.n != 1
+        || feature.w > 16384 || feature.h > 16384
+        || feature.c > 65535 || feature.total() > size_t(std::numeric_limits<int>::max())
+        || feature.dims != 3 || flow.dims != 3 || feature.elempack != 1
         || flow.elempack != 1 || feature.elemsize != sizeof(float)
         || flow.elemsize != sizeof(float) || flow.c != 2 || feature.w != flow.w
         || feature.h != flow.h)
